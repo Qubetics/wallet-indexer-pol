@@ -3,21 +3,21 @@ import { config } from "../config/config";
 import { BlockChainStatusEnum, BooleanEnum, CoinFamilyEnum, NotificationTypeEnum, TokenStandard, TrnxTypeEnum } from "../enum";
 import { NotificationInterface, TrnxHistoryModel } from "../models";
 import { Utility_Helper, Wallet_Helper, Blockchain_Helper, Db_Helper } from "../helpers";
-import ethProcessHelper from "./process.helper";
+import polProcessHelper from "./process.helper";
 import { Op } from "sequelize";
 import { global_helper } from "../helpers/global_helper";
 import kafkaHelper from "../config/kafka.helper";
-class EthTxStatusUpdateProcess {
+class PolTxStatusUpdateProcess {
   // public startTxStatusUpdateQueue = async () => {
   //   await rabbitMq.consumeQueue(
-  //     config.PENDING_WITHDRAWAL_TX_PROCESS_ETH || "",
+  //     config.PENDING_WITHDRAWAL_TX_PROCESS_POL || "",
   //     this.getTx
   //   );
   // };
 
   public startTxStatusUpdateQueue = async () => {
-    let consumer = await kafkaHelper.kafka.consumer({ groupId: config.KAFKA_TRANSACTIONS.ETH_PENDING_WITHDRAWAL_TX_GROUP_ID });
-    await consumer.subscribe({ topic: config.KAFKA_TRANSACTIONS.ETH_PENDING_WITHDRAWAL_TX_TOPIC, fromBeginning: true });
+    let consumer = await kafkaHelper.kafka.consumer({ groupId: config.KAFKA_TRANSACTIONS.POL_PENDING_WITHDRAWAL_TX_GROUP_ID });
+    await consumer.subscribe({ topic: config.KAFKA_TRANSACTIONS.POL_PENDING_WITHDRAWAL_TX_TOPIC, fromBeginning: true });
     await consumer.run({
       eachMessage: async ({ topic, partition, message }: { topic: any, partition: any, message: any }) => {
         console.log("🚀 ~ startTxStatusUpdateQueue topic >>>>", topic);
@@ -42,7 +42,7 @@ class EthTxStatusUpdateProcess {
           : 0;
         const gasPrice = parseFloat(transaction.gasPrice) || 0;
         const gasTotal = transaction.gas || 0;
-        const gasInEth: number = Number(await Blockchain_Helper.convertWeiToEth(
+        const gasInPol: number = Number(await Blockchain_Helper.convertWeiToPOL(
           await Utility_Helper.bigNumberSafeMath(
             gasUsed, '*', gasPrice
           ))
@@ -60,7 +60,7 @@ class EthTxStatusUpdateProcess {
             txid: transaction.hash,
             gasReverted: gasReverted,
             fromAddress: transactionReceipt.from.toLowerCase(),
-            tx_fee: gasInEth
+            tx_fee: gasInPol
           };
           await this.sendTxUpdate(txUpdate);
         } else if (!transactionReceipt.status) {
@@ -70,7 +70,7 @@ class EthTxStatusUpdateProcess {
             txid: transaction.hash,
             gasReverted: gasReverted,
             fromAddress: transactionReceipt.from.toLowerCase(),
-            tx_fee: gasInEth
+            tx_fee: gasInPol
           };
           await this.sendTxUpdate(txUpdate);
         }
@@ -89,7 +89,7 @@ class EthTxStatusUpdateProcess {
     tx_fee: number
   }) => {
     try {
-      let coin_data: any = await ethProcessHelper.CoinByCoinId(txData.coin_id);
+      let coin_data: any = await polProcessHelper.CoinByCoinId(txData.coin_id);
       const trx_data = {
         coin_id: txData?.coin_id,
         status: txData?.status,
@@ -147,11 +147,11 @@ class EthTxStatusUpdateProcess {
             // }
           }
 
-          let AddressWithdraw: any = await ethProcessHelper.check_our_wallet_address(from_address);
+          let AddressWithdraw: any = await polProcessHelper.check_our_wallet_address(from_address);
           if (AddressWithdraw) {
-            /** update withdraw user eth balance */
+            /** update withdraw user pol balance */
             if (tx_type !== TrnxTypeEnum.DAPP) {
-              const native_coin: any = await ethProcessHelper.NativeCoinByCoinFamily(coin_family);
+              const native_coin: any = await polProcessHelper.NativeCoinByCoinFamily(coin_family);
               await Wallet_Helper.Update_Balance(from_address, native_coin);
               if (trx_data?.coin?.is_token === BooleanEnum.true && trx_data.coin?.token_type.toLowerCase() === TokenStandard.ERC20.toLowerCase()) {
                 /** Update User ERC20 Token Balance */
@@ -199,7 +199,7 @@ class EthTxStatusUpdateProcess {
             };
             Utility_Helper.SendNotification(notifData);
           }
-          let Addressdeposit: any = await ethProcessHelper.check_our_wallet_address(to_address);
+          let Addressdeposit: any = await polProcessHelper.check_our_wallet_address(to_address);
           if (Addressdeposit) {
             let to_user_id: number = Addressdeposit ? Addressdeposit.user_id : 0;
             let trnxTypeD: string = "Deposit";
@@ -292,5 +292,5 @@ class EthTxStatusUpdateProcess {
 }
 
 
-export const ethTxStatusUpdateProcess = new EthTxStatusUpdateProcess();
-// export default ethTxStatusUpdateProcess;
+export const polTxStatusUpdateProcess = new PolTxStatusUpdateProcess();
+// export default polTxStatusUpdateProcess;

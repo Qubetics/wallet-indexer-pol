@@ -1,7 +1,7 @@
 export enum RabbitMQQueues {
-  DEPOSIT_QUEUE_BLOCKS_PROCESS = "ETHDepositQueueBlocksProcess",
-  WITHDRAW_QUEUE_BLOCKS_PROCESS = "ETHWithdrawQueueBlocksProcess",
-  PENDING_WITHDRAWAL_TX_PROCESS = "ETHPendingWithdrawalQueueBlocksProcess",
+  DEPOSIT_QUEUE_BLOCKS_PROCESS = "POLDepositQueueBlocksProcess",
+  WITHDRAW_QUEUE_BLOCKS_PROCESS = "POLWithdrawQueueBlocksProcess",
+  PENDING_WITHDRAWAL_TX_PROCESS = "POLPendingWithdrawalQueueBlocksProcess",
   BTC_DEPOSIT_QUEUE_BLOCKS_PROCESS = "BTCDepositQueueBlocksProcess",
   BTC_WITHDRAW_QUEUE_BLOCKS_PROCESS = "BTCWithdrawQueueBlocksProcess",
   BTC_PENDING_WITHDRAWAL_TX_PROCESS = "BTCPendingWithdrawalQueueBlocksProcess",

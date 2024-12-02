@@ -9,28 +9,28 @@ export const config = {
   DB_NAME: zookeeperConfig.config.DB_NAME,
   DB_PASSWORD: zookeeperConfig.config.DB_PASSWORD,
   DB_PORT: zookeeperConfig.config.DB_PORT,
-  // DEPOSIT_WITHDRAW_PROCESS_ETH: zookeeperConfig.config.DEPOSIT_WITHDRAW_PROCESS_ETH,
-  ETH_WALLET_ADDRESS: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.ETH_WALLET_ADDRESS}`,
+  // DEPOSIT_WITHDRAW_PROCESS_POL: zookeeperConfig.config.DEPOSIT_WITHDRAW_PROCESS_POL,
+  POL_WALLET_ADDRESS: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.POL_WALLET_ADDRESS}`,
   // WITHDRAW_QUEUE_BLOCKS_PROCESS: zookeeperConfig.config.WITHDRAW_QUEUE_BLOCKS_PROCESS,
   REDIS_CONN: zookeeperConfig.config.REDIS_CONN,
   KAFKA_BROKER: zookeeperConfig.config.KAFKA_BROKER,
   KAFKA_CLIENT_ID: zookeeperConfig.config.KAFKA_CLIENT_ID,
   MIN_BLOCK_CONFORMATIONS: zookeeperConfig.config.MIN_BLOCK_CONFORMATIONS,
-  TOKEN_TYPE_ETH: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.TOKEN_TYPE_ETH}`,
-  TOKEN_TYPE721_ETH: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.TOKEN_TYPE721_ETH}`,
+  TOKEN_TYPE_POL: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.TOKEN_TYPE_POL}`,
+  TOKEN_TYPE721_POL: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.TOKEN_TYPE721_ETH}`,
   STATIC_COIN_FAMILY: zookeeperConfig.config.STATIC_COIN_FAMILY,
   // added new
   KEYS: {
     FCM_PUSH: zookeeperConfig.config.FCM_PUSH
   },
   REDISKEYS: {
-    ETH_BLOCKS: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.ETH_BLOCKS} `,
-    OLD_BLOCK_ETH: zookeeperConfig.config.OLD_BLOCK_ETH,
-    NEW_BLOCK_ETH: zookeeperConfig.config.NEW_BLOCK_ETH,
+    POL_BLOCKS: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.POL_BLOCKS} `,
+    OLD_BLOCK_POL: zookeeperConfig.config.OLD_BLOCK_POL,
+    NEW_BLOCK_POL: zookeeperConfig.config.NEW_BLOCK_POL,
     ALL_PROCESSES: zookeeperConfig.config.ALL_PROCESSES,
-    ETH_ERROR_LOGS: zookeeperConfig.config.ETH_ERROR_LOGS,
-    NODE_ALERT_ETH: zookeeperConfig.config.NODE_ALERT_ETH,
-    SPECIFIC_BLOCK_ETH: zookeeperConfig.config.SPECIFIC_BLOCK_ETH
+    POL_ERROR_LOGS: zookeeperConfig.config.POL_ERROR_LOGS,
+    NODE_ALERT_POL: zookeeperConfig.config.NODE_ALERT_POL,
+    SPECIFIC_BLOCK_POL: zookeeperConfig.config.SPECIFIC_BLOCK_POL
   },
 
   /**
@@ -71,7 +71,7 @@ export const config = {
     TRX_API_KEY: zookeeperConfig.config.TRX_API_KEY
   },
   NODE_ISSUE_ALERT_EMAIL: zookeeperConfig.config.NODE_ISSUE_ALERT_EMAIL,
-  READ_BEHINED_BLOCK_ETH: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.READ_BEHINED_BLOCK_ETH}`,
+  READ_BEHINED_BLOCK_POL: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.READ_BEHINED_BLOCK_POL}`,
   BLOCKS: zookeeperConfig.config.BLOCKS,
   CONTRACT_ABI: [
     {

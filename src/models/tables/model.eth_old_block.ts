@@ -1,11 +1,11 @@
 import { DataTypes, Model, Optional } from "sequelize";
-import { EthOldBlockInterface } from "../interfaces/index";
+import { PolOldBlockInterface } from "../interfaces/index";
 import db from "../../config/db";
 
-interface EthOldBlockCreationModel extends Optional<EthOldBlockInterface, "id"> { }
-interface EthOldBlockInstance
-    extends Model<EthOldBlockInterface, EthOldBlockCreationModel>,
-    EthOldBlockInterface { }
+interface PolOldBlockCreationModel extends Optional<PolOldBlockInterface, "id"> { }
+interface PolOldBlockInstance
+    extends Model<PolOldBlockInterface, PolOldBlockCreationModel>,
+    PolOldBlockInterface { }
 
 let dataObj = {
     id: {
@@ -47,6 +47,6 @@ let dataObjIndex = {
 }
 
 
-const EthOldBLockModel = db.db_write.define<EthOldBlockInstance>("eth_old_blocks", dataObj, dataObjIndex);
+const PolOldBLockModel = db.db_write.define<PolOldBlockInstance>("pol_old_blocks", dataObj, dataObjIndex);
 
-export default EthOldBLockModel;
+export default PolOldBLockModel;

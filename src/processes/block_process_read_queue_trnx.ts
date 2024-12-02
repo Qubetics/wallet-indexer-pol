@@ -3,7 +3,7 @@ import kafkaHelper from "../config/kafka.helper";
 import { Blockchain_Helper, Utility_Helper } from "../helpers";
 import { blocks_trnx } from "../interfaces/global_helper";
 import { TransactionReceipt } from "web3-core";
-import ethProcessHelper from "./process.helper";
+import polProcessHelper from "./process.helper";
 import { TxType } from "../types/ERC20Tokens.types";
 import { TrnxTypeEnum } from "../enum";
 import { global_helper } from "../helpers/global_helper";
@@ -57,19 +57,19 @@ class queue_transactions {
     };
     // public async consume_queue_trnx() {
     //     // Latest transactions
-    //     rabbitMq.only_assert_queue(config.TRANSACTIONS.eth_block_topic);
-    //     console.error(`RABBITMQ_BLOCK_ALL_TRNX_PROCESS >>>`, config.TRANSACTIONS.eth_all_blocks);
-    //     //rabbitMq.only_consume_queue(config.TRANSACTIONS.eth_all_blocks, this.read_trnx);
+    //     rabbitMq.only_assert_queue(config.TRANSACTIONS.pol_block_topic);
+    //     console.error(`RABBITMQ_BLOCK_ALL_TRNX_PROCESS >>>`, config.TRANSACTIONS.pol_all_blocks);
+    //     //rabbitMq.only_consume_queue(config.TRANSACTIONS.pol_all_blocks, this.read_trnx);
 
-    //     for (let i = 1; i <= Number(config.TRANSACTIONS.eth_transaction_consumer_count); i++) {
-    //         rabbitMq.only_consume_queue(config.TRANSACTIONS.eth_all_blocks, this.read_trnx);
+    //     for (let i = 1; i <= Number(config.TRANSACTIONS.pol_transaction_consumer_count); i++) {
+    //         rabbitMq.only_consume_queue(config.TRANSACTIONS.pol_all_blocks, this.read_trnx);
     //         // RabbitMq.consumeQueue(this.RABBITMQ_BLOCK_ALL_TRNX_PROCESS, this.GetTxDetail);
     //     }
     //     //==========================================================
     //     // Behined transactions
-    //     rabbitMq.only_assert_queue(config.TRANSACTIONS.eth_behined_transactions);
-    //     console.error(`RABBITMQ_BLOCK_ALL_TRNX_PROCESS >>>`, config.TRANSACTIONS.eth_behined_transactions);
-    //     rabbitMq.only_consume_queue(config.TRANSACTIONS.eth_behined_transactions, this.read_trnx);
+    //     rabbitMq.only_assert_queue(config.TRANSACTIONS.pol_behined_transactions);
+    //     console.error(`RABBITMQ_BLOCK_ALL_TRNX_PROCESS >>>`, config.TRANSACTIONS.pol_behined_transactions);
+    //     rabbitMq.only_consume_queue(config.TRANSACTIONS.pol_behined_transactions, this.read_trnx);
     //     //==========================================================
     // }
     public async read_trnx(data: blocks_trnx) {
@@ -88,7 +88,7 @@ class queue_transactions {
             if (txReceipt?.status === false && txReceipt !== null) {
                 console.log("(txReceipt.status === false && txReceipt !== null")
             } else {
-                await eth_tx_status_deposit_withdraw.buildTx(txReceipt, data)
+                await pol_tx_status_deposit_withdraw.buildTx(txReceipt, data)
             }
         } catch (error: any) {
             console.error("Error in read_trnx>>>", error)
@@ -103,11 +103,11 @@ class queue_transactions {
         try {
             if (txReceipt.status == true && txReceipt.logs.length > 0) {
                 const gasUsed = txReceipt.gasUsed ? txReceipt.gasUsed : 0;
-                const gasInEth = await Blockchain_Helper.convertWeiToEth(
+                const gasInPol = await Blockchain_Helper.convertWeiToPOL(
                     await Utility_Helper.bigNumberSafeMath(gasUsed, '*', txReceipt.effectiveGasPrice)
                 );
                 for await (const log of txReceipt.logs) {
-                    const isToken: any = await ethProcessHelper.checkIfContract(log.address);
+                    const isToken: any = await polProcessHelper.checkIfContract(log.address);
                     if (isToken !== null && log.topics[2] !== undefined) {
                         if (log?.topics && log?.topics[0] == this.approval) {
                             continue;
@@ -127,30 +127,30 @@ class queue_transactions {
                                 blockId: log.blockNumber,
                                 isNFTToken: false,
                                 txType: null,
-                                trnx_fee: Number(gasInEth)
+                                trnx_fee: Number(gasInPol)
                             };
                             await this.checkAddressInDB(txData);
                         }
                     }
-                    /** swap transaction then also check eth */
+                    /** swap transaction then also check pol */
                     if (log?.topics && log?.topics[0] == this.swap) {
-                        await eth_tx_status_deposit_withdraw.check_eth_deposit(data, txReceipt);
+                        await pol_tx_status_deposit_withdraw.check_pol_deposit(data, txReceipt);
                     } else if (isToken == null && log.topics[2] !== undefined && log?.topics[0] == this.transfer) {
-                        await eth_tx_status_deposit_withdraw.check_eth_deposit(data, txReceipt)
+                        await pol_tx_status_deposit_withdraw.check_pol_deposit(data, txReceipt)
                     }
                 }
             } else {
-                await eth_tx_status_deposit_withdraw.check_eth_deposit(data, txReceipt);
+                await pol_tx_status_deposit_withdraw.check_pol_deposit(data, txReceipt);
             }
         } catch (error: any) {
             console.error("buildTx error >>>", (error as Error).message);
-            await global_helper.save_error_logs('Eth_buildTx', error.message)
+            await global_helper.save_error_logs('Pol_buildTx', error.message)
         }
     };
-    public async check_eth_deposit(data: blocks_trnx, txReceipt: any) {
+    public async check_pol_deposit(data: blocks_trnx, txReceipt: any) {
         try {
             const gasUsed = txReceipt.gasUsed ? txReceipt.gasUsed : 0;
-            const gasInEth = await Blockchain_Helper.convertWeiToEth(
+            const gasInPol = await Blockchain_Helper.convertWeiToPOL(
                 await Utility_Helper.bigNumberSafeMath(
                     gasUsed, '*', txReceipt.effectiveGasPrice
                 )
@@ -158,7 +158,7 @@ class queue_transactions {
             // const { getTransaction } = Blockchain_Helper.Web3.eth;
             // const transaction = await getTransaction(txId);
 
-            /** for check the eth deposit */
+            /** for check the pol deposit */
             if (
                 txReceipt.status == true,
                 data.value !== '0' &&
@@ -175,33 +175,33 @@ class queue_transactions {
                     blockId: data?.block_number,
                     isNFTToken: false,
                     txType: TrnxTypeEnum.NULL,
-                    trnx_fee: Number(gasInEth)
+                    trnx_fee: Number(gasInPol)
                 };
                 await this.checkAddressInDB(txData);
             }
         } catch (error: any) {
-            console.error("💥 ~ ~ check_eth_deposit error", (error as Error).message);
-            await global_helper.save_error_logs('ETH_check_deposit', error.message)
+            console.error("💥 ~ ~ check_pol_deposit error", (error as Error).message);
+            await global_helper.save_error_logs('POL_check_deposit', error.message)
 
         }
     }
     public async checkAddressInDB(txData: TxType) {
         try {
             let ourTrnx: any = null;
-            let withdraw = await ethProcessHelper.check_our_wallet_address(txData.fromAddress);
+            let withdraw = await polProcessHelper.check_our_wallet_address(txData.fromAddress);
             if (withdraw) {
                 console.log("Found the user in FROM (WITHDRAW) tx 😸");
                 txData.txType = TrnxTypeEnum.WITHDRAW;
                 ourTrnx = txData;
             }
-            let deposit = await ethProcessHelper.check_our_wallet_address(txData.toAddress);
+            let deposit = await polProcessHelper.check_our_wallet_address(txData.toAddress);
             if (deposit) {
                 console.log("Found the user in to (DEPOSIT) tx 😸");
                 txData.txType = TrnxTypeEnum.DEPOSIT;
                 ourTrnx = txData;
             }
             if (ourTrnx) {
-                await eth_tx_status_deposit_withdraw.addTxToQueue(
+                await pol_tx_status_deposit_withdraw.addTxToQueue(
                     ourTrnx,
                     this.deposit_withdraw_topic || ""
                 );
@@ -218,10 +218,10 @@ class queue_transactions {
             // await rabbitMq.sendToQueue(queueName, Buffer.from(JSON.stringify(data)));
         } catch (err: any) {
             console.error("addTxToQueue", (err as Error).message);
-            await global_helper.save_error_logs('ETH_checkAddressInDB', err.message)
+            await global_helper.save_error_logs('POL_checkAddressInDB', err.message)
 
         }
     };
 
 }
-export const eth_tx_status_deposit_withdraw = new queue_transactions()
+export const pol_tx_status_deposit_withdraw = new queue_transactions()

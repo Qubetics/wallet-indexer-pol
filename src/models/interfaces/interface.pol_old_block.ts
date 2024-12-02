@@ -1,4 +1,4 @@
-export interface EthOldBlockInterface {
+export interface PolOldBlockInterface {
     id: number;
     block_number: number;
     start_block: number;
