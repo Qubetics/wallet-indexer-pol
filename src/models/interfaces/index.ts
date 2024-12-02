@@ -1,0 +1,10 @@
+export { CoinInterface } from './interface.coins';
+export { NotificationInterface } from './interface.notifactions';
+export { DeviceTokenInterface } from './interface.device_tokens';
+export { ITrnxHistoryInterface } from './interface.trnxHistory';
+export { WalletInterface } from './interface.wallets';
+export { EthOldBlockInterface } from './interface.eth_old_block';
+export { SettingsInterface } from './interface.settings';
+export { CatchErrorMsgsInterface } from './interface.catch_error_logs';
+export { CoinPriceInFiatInterface } from './interface.coin_price_fiat';
+export { CustomTokenInterface } from './interface.custom_tokens';
