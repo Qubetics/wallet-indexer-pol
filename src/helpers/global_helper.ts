@@ -93,19 +93,19 @@ class Global_helper {
     }
     public async save_error_logs(fn_name: string, error_message: any) {
         try {
-            let value_exist: any = await polProcessHelper.getKeyValuePair(config.REDISKEYS.ALL_PROCESSES, config.REDISKEYS.ETH_ERROR_LOGS)
+            let value_exist: any = await polProcessHelper.getKeyValuePair(config.REDISKEYS.ALL_PROCESSES, config.REDISKEYS.POL_ERROR_LOGS)
             if (value_exist) {
                 if (Number(value_exist) == 0) {
                     await CatchErrorMsgsModel.create({
                         fx_name: fn_name,
                         error_msg: error_message || {}
                     })
-                    await polProcessHelper.setKeyValuePair(config.REDISKEYS.ALL_PROCESSES, config.REDISKEYS.ETH_ERROR_LOGS, '1')
+                    await polProcessHelper.setKeyValuePair(config.REDISKEYS.ALL_PROCESSES, config.REDISKEYS.POL_ERROR_LOGS, '1')
                 } else {
                     console.log("value other than 0 exist")
                 }
             } else {
-                await polProcessHelper.setKeyValuePair(config.REDISKEYS.ALL_PROCESSES, config.REDISKEYS.ETH_ERROR_LOGS, '0')
+                await polProcessHelper.setKeyValuePair(config.REDISKEYS.ALL_PROCESSES, config.REDISKEYS.POL_ERROR_LOGS, '0')
                 console.log("value does not exist")
             }
         } catch (err: any) {

@@ -1,4 +1,4 @@
-import { polWithdrawDepositProcess, polPendingWithdrawalProcess, polTxStatusUpdateProcess, pol_blocks_process, pol_tx_status_deposit_withdraw, POL_balance_update } from "./processes/index.process"
+import { polWithdrawDepositProcess, polPendingWithdrawalProcess, polTxStatusUpdateProcess, pol_blocks_process, pol_tx_status_deposit_withdraw, pol_balance_update } from "./processes/index.process"
 import schedule from "node-schedule";
 class POLStartProcess {
   constructor() {
@@ -8,11 +8,11 @@ class POLStartProcess {
     this.polWithdrawDepositProcess();
     this.getPendingWithdrawalTxProcess();
     this.updateTxStatusProcess();
-    this.POLUpdateBalance();
+    this.polUpdateBalance();
     // this.testing_node()
   }
   public read_block_process() {
-    schedule.scheduleJob("*/12 * * * * *", async function () {
+    schedule.scheduleJob("*/2 * * * * *", async function () {
       await pol_blocks_process.getBlocks();
       await pol_blocks_process.readBehindBlock()
     });
@@ -48,9 +48,9 @@ class POLStartProcess {
       await polTxStatusUpdateProcess.startTxStatusUpdateQueue();
     }, 10000);
   }
-  public async POLUpdateBalance() {
+  public async polUpdateBalance() {
     setTimeout(async () => {
-      await POL_balance_update.default.update_wallet_balance();
+      await pol_balance_update.default.update_wallet_balance();
     }, 10000);
   }
 }
