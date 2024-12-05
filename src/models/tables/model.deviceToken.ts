@@ -18,6 +18,10 @@ let dataObj = {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  device_id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   device_token: {
     type: DataTypes.TEXT,
     allowNull: false,
