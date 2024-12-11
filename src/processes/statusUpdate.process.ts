@@ -120,7 +120,7 @@ class PolTxStatusUpdateProcess {
   public async updateBroadcastTx(
     trx_data: any
   ) {
-    const txnData: any = await TrnxHistoryModel.findOne({ attributes: ['from_adrs', 'amount', 'user_id', 'id', 'to_adrs', 'type', 'coin_family', 'amount_in_fiat', 'fiat_type'], where: { tx_id: trx_data.txid, status: 'completed', [Op.or]: [{ blockchain_status: { [Op.is]: null as any } }, { blockchain_status: 'pending' }] }, raw: true });
+    const txnData: any = await TrnxHistoryModel.findOne({ attributes: ['from_adrs', 'amount', 'user_id', 'id', 'to_adrs', 'type', 'coin_family', 'fiat_type'], where: { tx_id: trx_data.txid, status: 'completed', [Op.or]: [{ blockchain_status: { [Op.is]: null as any } }, { blockchain_status: 'pending' }] }, raw: true });
     if (txnData) {
       let from_address = txnData.from_adrs;
       let amount = txnData.amount;
