@@ -1,16 +1,16 @@
 import BigNumber from "bignumber.js";
 // import FCM from 'fcm-push';
 // /import FCM from 'fcm-node'
-var FCM = require("fcm-node");
+// var FCM = require("fcm-node");
 
 
 import {
     Db_Helper
 } from ".";
 
-import {
-    config
-} from "../config/config";
+// import {
+//     config
+// } from "../config/config";
 
 import { NotificationModel } from "../models";
 // const firebaseAdmin = require("firebase-admin");
@@ -28,7 +28,7 @@ class UtilityHelper {
 
     }
     //    public REDIS_BLOCKS: string = `${CONFIG.REDISKEYS.BLOCKS}_${CONFIG.COIN_FAMILY_POL}`;
-    public FCM_SERVER_KEY: any = config.KEYS.FCM_PUSH;
+    // public FCM_SERVER_KEY: any = config.KEYS.FCM_PUSH;
 
     bigNumberSafeMath = async (c: any, operation: any, d: any) => {
         18;
