@@ -7,7 +7,7 @@
     "compile": "tsc",
     "server": "nodemon --max-old-space-size=20480 build/index.pol.js",
     "dev": "concurrently \"npm run compile\" \"npm run server\"",
-    "start": "npm run compile && cp -a ./src/constants/fcm.admin.key.json ./build/constants/fcm.admin.key.json && node build/index.pol.js"
+    "start": "npm run compile && node build/index.pol.js"
   },
   "keywords": [
     "processes"

@@ -15,8 +15,9 @@ import {
 import { NotificationModel } from "../models";
 // const firebaseAdmin = require("firebase-admin");
 import firebaseAdmin from 'firebase-admin';
-const fcmServiceAccount = require("../constants/fcm.admin.key.json");
-// import fcmServiceAccount from "../constants/fcm.admin.key.json";
+// const fcmServiceAccount = require("../constants/fcm.admin.key.json");
+import { fcmServiceAccount } from "../constants/fcm.admin.key";
+import { Op } from "sequelize";
 
 class UtilityHelper {
     public messaging: firebaseAdmin.messaging.Messaging;
@@ -283,11 +284,12 @@ class UtilityHelper {
             /* save notification */
             const checkOldNotif: any = await NotificationModel.count({
                 where: {
-                    to_user_id: toUserId,
+                    wallet_address: { [Op.like]: data.wallet_address },
                     notification_type: data.notification_type,
                     tx_id: data.tx_id,
-                    tx_type: data.tx_type,
+                    // tx_type: data.tx_type,
                 },
+                // logging: true
             });
             if (checkOldNotif == 0) {
                 let notificationModel: any = {
