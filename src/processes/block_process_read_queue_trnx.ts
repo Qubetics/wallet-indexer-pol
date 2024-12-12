@@ -12,6 +12,7 @@ class queue_transactions {
     public approval: string | null;
     public swap: string | null;
     public transfer: string | null;
+    public log_fee_transfer: string | null;
 
     public pol_block_tx_topic = config.KAFKA_BLOCKS.POL_BLOCK_TX_TOPIC;
     public pol_block_tx_group_id = config.KAFKA_BLOCKS.POL_BLOCK_TX_GROUP_ID;
@@ -23,6 +24,7 @@ class queue_transactions {
         this.approval = Blockchain_Helper.Web3.utils.sha3('Approval(address,address,uint256)');
         this.swap = Blockchain_Helper.Web3.utils.sha3('Swap(address,uint256,uint256,uint256,uint256,address)');
         this.transfer = Blockchain_Helper.Web3.utils.sha3('Transfer(address,address,uint256)');
+        this.log_fee_transfer = Blockchain_Helper.Web3.utils.sha3('LogFeeTransfer(address,address,address,uint256,uint256,uint256,uint256,uint256)');
 
     }
 
@@ -88,6 +90,7 @@ class queue_transactions {
             if (txReceipt?.status === false && txReceipt !== null) {
                 console.log("(txReceipt.status === false && txReceipt !== null")
             } else {
+                // console.log('in build function >>>', data.tx_id);
                 await pol_tx_status_deposit_withdraw.buildTx(txReceipt, data)
             }
         } catch (error: any) {
@@ -108,6 +111,7 @@ class queue_transactions {
                 );
                 for await (const log of txReceipt.logs) {
                     const isToken: any = await polProcessHelper.checkIfContract(log.address);
+                    // console.log('isToken >>>', log.address, '-----', data.tx_id, isToken);
                     if (isToken !== null && log.topics[2] !== undefined) {
                         if (log?.topics && log?.topics[0] == this.approval) {
                             continue;
@@ -133,13 +137,14 @@ class queue_transactions {
                         }
                     }
                     /** swap transaction then also check pol */
-                    if (log?.topics && log?.topics[0] == this.swap) {
+                    if (log?.topics && log?.topics[0] == this.swap || log?.topics && log?.topics[0] == this.log_fee_transfer) {
                         await pol_tx_status_deposit_withdraw.check_pol_deposit(data, txReceipt);
                     } else if (isToken == null && log.topics[2] !== undefined && log?.topics[0] == this.transfer) {
                         await pol_tx_status_deposit_withdraw.check_pol_deposit(data, txReceipt)
                     }
                 }
             } else {
+                // console.log('in build function222 >>>', data.tx_id);
                 await pol_tx_status_deposit_withdraw.check_pol_deposit(data, txReceipt);
             }
         } catch (error: any) {
@@ -149,6 +154,7 @@ class queue_transactions {
     };
     public async check_pol_deposit(data: blocks_trnx, txReceipt: any) {
         try {
+            // console.log('in check_pol_deposit function >>>', data.tx_id);
             const gasUsed = txReceipt.gasUsed ? txReceipt.gasUsed : 0;
             const gasInPol = await Blockchain_Helper.convertWeiToPOL(
                 await Utility_Helper.bigNumberSafeMath(

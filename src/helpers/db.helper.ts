@@ -103,18 +103,19 @@ class DbHelper {
             return await DeviceTokenModel.findAll({
                 attributes: ["device_token"],
                 where: {
-                    user_id: user_id,
+                    // user_id: user_id,
                     address: {
                         [Op.like]: address,
                     },
                     coin_family: coin_family,
                     push: BooleanEnum.true
                 },
-                order: [
-                    ["updated_at", "DESC"],
-                    ['id', 'DESC']
-                ],
-                limit: 3,
+                // order: [
+                //     ["updated_at", "DESC"],
+                //     ['id', 'DESC']
+                // ],
+                // limit: 3,
+                // logging: true,
                 raw: true
             });
         } catch (error: any) {

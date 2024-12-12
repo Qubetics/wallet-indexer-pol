@@ -13,16 +13,19 @@ import {
 } from "../config/config";
 
 import { NotificationModel } from "../models";
-const firebaseAdmin = require("firebase-admin");
-import fcmServiceAccount from "../constants/fcm.admin.key.json";
+// const firebaseAdmin = require("firebase-admin");
+import firebaseAdmin from 'firebase-admin';
+const fcmServiceAccount = require("../constants/fcm.admin.key.json");
+// import fcmServiceAccount from "../constants/fcm.admin.key.json";
 
 class UtilityHelper {
+    public messaging: firebaseAdmin.messaging.Messaging;
     constructor() {
-        (async () => {
-            await firebaseAdmin.initializeApp({
-                credential: firebaseAdmin.credential.cert(fcmServiceAccount),
-            });
-        })();
+        firebaseAdmin.initializeApp({
+            credential: firebaseAdmin.credential.cert(fcmServiceAccount),
+        });
+        this.messaging = firebaseAdmin.messaging();
+
     }
     //    public REDIS_BLOCKS: string = `${CONFIG.REDISKEYS.BLOCKS}_${CONFIG.COIN_FAMILY_POL}`;
     public FCM_SERVER_KEY: any = config.KEYS.FCM_PUSH;
@@ -223,20 +226,19 @@ class UtilityHelper {
             for await (let deviceToken of deviceTokens) {
                 finalDeviceTokens.push(deviceToken.device_token);
             }
-
+            console.log('finalDeviceTokens >>>', finalDeviceTokens);
             if (finalDeviceTokens?.length > 0) {
                 let announcement_title: string = data.announcement_title == undefined ? "" : data.announcement_title;
                 let announcement_message: string = data.announcement_message == undefined ? "" : data.announcement_message;
-                const messaging = firebaseAdmin.messaging();
                 const notification = {
                     title: data.title,
                     body: data.message,
                 };
 
-                messaging
-                    .sendMulticast({
+                this.messaging
+                    .sendEachForMulticast({
                         tokens: finalDeviceTokens,
-                        collapse_key: "type_a",
+                        // collapse_key: "type_a",
                         notification: notification,
                         data: {
                             body: data.message ? data.message : "",
