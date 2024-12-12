@@ -110,10 +110,10 @@ class DbHelper {
                     coin_family: coin_family,
                     push: BooleanEnum.true
                 },
-                // order: [
-                //     ["updated_at", "DESC"],
-                //     ['id', 'DESC']
-                // ],
+                order: [
+                    ["updated_at", "DESC"],
+                    ['id', 'DESC']
+                ],
                 // limit: 3,
                 // logging: true,
                 raw: true

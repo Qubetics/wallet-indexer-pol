@@ -284,7 +284,7 @@ class UtilityHelper {
             /* save notification */
             const checkOldNotif: any = await NotificationModel.count({
                 where: {
-                    wallet_address: { [Op.like]: data.wallet_address },
+                    wallet_address:{[Op.like]: data.wallet_address},
                     notification_type: data.notification_type,
                     tx_id: data.tx_id,
                     // tx_type: data.tx_type,
