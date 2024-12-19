@@ -2,10 +2,10 @@ import { polWithdrawDepositProcess, polPendingWithdrawalProcess, polTxStatusUpda
 import schedule from "node-schedule";
 class POLStartProcess {
   constructor() {
-    // this.read_block_process()
-    // this.readSpecificBlock()
-    // this.consume_read_block_queue()
-    // this.polWithdrawDepositProcess();
+    this.read_block_process()
+    this.readSpecificBlock()
+    this.consume_read_block_queue()
+    this.polWithdrawDepositProcess();
     this.getPendingWithdrawalTxProcess();
     this.updateTxStatusProcess();
     this.polUpdateBalance();
