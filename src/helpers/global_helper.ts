@@ -30,17 +30,6 @@ class Global_helper {
                     status: 1
                 }
                 await WalletModel.create(data_obj)
-            } else {
-                let updateObj: any = { status: 1 }
-                if (balance) {
-                    updateObj.balance = balance
-                }
-                await WalletModel.update(updateObj, {
-                    where: {
-                        wallet_address: wallet_address,
-                        coin_id: coin.coin_id,
-                    }
-                })
             }
 
             console.log("wallet created>>")

@@ -1,17 +1,13 @@
 import zookeeperConfig from "../helpers/zookeeper.helper";
 const name = 'qubetics';
 export const config = {
-  // API_URL: zookeeperConfig.config.API_URL,
-  // NETWORK: zookeeperConfig.config.NETWORK,
   DB_USER: zookeeperConfig.config.DB_USER,
   DB_HOST_READ: zookeeperConfig.config.DB_HOST_READ,
   DB_HOST_WRITE: zookeeperConfig.config.DB_HOST_WRITE,
   DB_NAME: zookeeperConfig.config.DB_NAME,
   DB_PASSWORD: zookeeperConfig.config.DB_PASSWORD,
   DB_PORT: zookeeperConfig.config.DB_PORT,
-  // DEPOSIT_WITHDRAW_PROCESS_POL: zookeeperConfig.config.DEPOSIT_WITHDRAW_PROCESS_POL,
   POL_WALLET_ADDRESS: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.POL_WALLET_ADDRESS}`,
-  // WITHDRAW_QUEUE_BLOCKS_PROCESS: zookeeperConfig.config.WITHDRAW_QUEUE_BLOCKS_PROCESS,
   REDIS_CONN: zookeeperConfig.config.REDIS_CONN,
   KAFKA_BROKER: zookeeperConfig.config.KAFKA_BROKER,
   KAFKA_CLIENT_ID: zookeeperConfig.config.KAFKA_CLIENT_ID,
@@ -19,10 +15,6 @@ export const config = {
   TOKEN_TYPE_POL: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.TOKEN_TYPE_POL}`,
   TOKEN_TYPE721_POL: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.TOKEN_TYPE721_ETH}`,
   STATIC_COIN_FAMILY: zookeeperConfig.config.STATIC_COIN_FAMILY,
-  // added new
-  // KEYS: {
-  //   FCM_PUSH: zookeeperConfig.config.FCM_PUSH
-  // },
   REDISKEYS: {
     POL_BLOCKS: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.POL_BLOCKS} `,
     OLD_BLOCK_POL: zookeeperConfig.config.OLD_BLOCK_POL,
@@ -62,13 +54,7 @@ export const config = {
     FROM_GMAIL: zookeeperConfig.config.FROM_GMAIL
   },
   NODE: {
-    BNB_RPC_URL: zookeeperConfig.config.BNB_RPC_URL,
-    ETH_RPC_URL: zookeeperConfig.config.ETH_RPC_URL,
-    POL_RPC_URL: zookeeperConfig.config.POL_RPC_URL,
-    BTC_RPC_URL: zookeeperConfig.config.BTC_RPC_URL,
-    BTC_API_KEY: zookeeperConfig.config.BTC_API_KEY,
-    TRX_RPC_URL: zookeeperConfig.config.TRX_RPC_URL,
-    TRX_API_KEY: zookeeperConfig.config.TRX_API_KEY
+    POL_RPC_URL: zookeeperConfig.config.POL_RPC_URL
   },
   NODE_ISSUE_ALERT_EMAIL: zookeeperConfig.config.NODE_ISSUE_ALERT_EMAIL,
   READ_BEHINED_BLOCK_POL: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.READ_BEHINED_BLOCK_POL}`,
