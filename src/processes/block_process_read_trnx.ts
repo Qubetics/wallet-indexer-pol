@@ -66,10 +66,10 @@ class Pol_block_process {
     }
     public async readBlocks(blockNumber: number, toBlockNumber: number) {
         try {
-            console.log("blockNumber", blockNumber)
+            // console.log("blockNumber", blockNumber)
             let block_updated: number = blockNumber + 1;
             await polProcessHelper.setKeyValuePair(config.REDISKEYS.POL_BLOCKS, config.REDISKEYS.OLD_BLOCK_POL, block_updated.toString());
-            console.log("blockNumber updated", block_updated)
+            // console.log("blockNumber updated", block_updated)
             console.table({
                 LATEST_BLOCK: blockNumber,
                 BLOCK_DIFFERENCE: toBlockNumber - blockNumber,
@@ -95,7 +95,7 @@ class Pol_block_process {
                 return; // Exit early if there are no transactions
             }
             const transactionPromises = blockInfo.transactions.map(async (tx) => {
-                console.log('tx.hash >>', tx.hash, 'blockId >>>', blockId);
+                // console.log('tx.hash >>', tx.hash, 'blockId >>>', blockId);
                 const data: blocks_trnx = {
                     block_number: blockId,
                     tx_id: tx.hash || '',
