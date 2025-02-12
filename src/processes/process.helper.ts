@@ -154,7 +154,7 @@ class PolProcessHelper {
   public fetchERC20Tokens = async () => {
     try {
       let tokens: any = await CoinsModel.findAll({
-        attributes: ["coin_id", "coin_name", "coin_symbol", "mainnet_token_address", "coin_gicko_alias", "coin_image", "coin_family", "coin_status", "is_token", "token_type", "decimals", "cmc_id", "is_on_cmc", "usd_price", "withdraw_limit", "token_abi", "uuid", "token_address", "for_swap", "added_by", "created_at", "updated_at"],
+        attributes: ["coin_id", "coin_name", "coin_symbol", "coin_image", "coin_family", "coin_status", "is_token", "token_type", "decimals", "cmc_id", "is_on_cmc", "token_abi", "token_address", "for_swap", "added_by", "created_at", "updated_at"],
         where: {
           coin_status: 1,
           coin_family: config.STATIC_COIN_FAMILY.POL,
