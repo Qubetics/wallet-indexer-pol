@@ -22,7 +22,7 @@ export interface ITrnxHistoryInterface {
     nonce: number;
     tx_fee: number;
     swap_fee: number | 0;
-    amount_in_fiat: string | null;
+    // amount_in_fiat: string | null;
     gas_limit: number;
     gas_price: number;
     gas_reverted: number;

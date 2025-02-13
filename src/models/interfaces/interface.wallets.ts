@@ -5,9 +5,7 @@ export interface WalletInterface {
   wallet_name: string;
   wallet_address: string;
   coin_id: number;
-  coin_name?: string;
   balance: number | string;
-  coin_image?: string | null | undefined;
   // balance_blocked?: number | 0;
   // user_withdraw_limit?: number | 0;
   default_wallet?: number | 0;
@@ -19,6 +17,4 @@ export interface WalletInterface {
   // created_at: string;
   // updated_at: string;
   coin_family?: number;
-  coin_symbol?: string;
-  decimals?: number | 0;
 }

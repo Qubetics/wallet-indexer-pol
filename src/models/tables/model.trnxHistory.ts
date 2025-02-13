@@ -99,10 +99,10 @@ let dataObj = {
         type: DataTypes.DOUBLE,
         allowNull: true
     },
-    amount_in_fiat: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
+    // amount_in_fiat: {
+    //     type: DataTypes.STRING,
+    //     allowNull: true
+    // },
     gas_limit: {
         type: DataTypes.INTEGER,
         allowNull: true
