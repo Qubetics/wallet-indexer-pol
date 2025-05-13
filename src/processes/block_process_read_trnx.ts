@@ -8,6 +8,7 @@ import { PolOldBLockModel } from "../models";
 import { Op } from "sequelize";
 import { global_helper } from "../helpers/global_helper";
 import kafkaHelper from "../config/kafka.helper";
+import { ethers } from "ethers";
 
 
 class Pol_block_process {
@@ -19,8 +20,8 @@ class Pol_block_process {
 
     constructor() {
         this.minBlockConfirmation = Number(config.MIN_BLOCK_CONFORMATIONS);
-        this.swap = Blockchain_Helper.Web3.utils.sha3('Swap(address,uint256,uint256,uint256,uint256,address)');
-        this.approval = Blockchain_Helper.Web3.utils.sha3('Approval(address,address,uint256)');
+        this.swap = ethers.id('Swap(address,uint256,uint256,uint256,uint256,address)');
+        this.approval = ethers.id('Approval(address,address,uint256)');
     }
 
     public async getBlocks() {
@@ -82,24 +83,24 @@ class Pol_block_process {
         }
     }
     public async getTxFromBlock(blockId: number, key: string) {
-        const { getBlock } = Blockchain_Helper.Web3.eth;
         try {
-            const blockInfo = await getBlock(blockId, true);
+            const blockInfo = await Blockchain_Helper.provider.getBlock(blockId, true);
             if (!blockInfo) {
                 console.log("No block info");
                 await PolOldBLockModel.create({ block_number: blockId, coin_family: config.STATIC_COIN_FAMILY.POL, start_block: blockId, end_block: blockId, status: 0 })
                 return;
             }
-            if (!blockInfo.transactions || blockInfo.transactions.length === 0) {
-                console.log("No block info transactions");
-                return; // Exit early if there are no transactions
-            }
-            const transactionPromises = blockInfo.transactions.map(async (tx) => {
+            const transactions = blockInfo.prefetchedTransactions || [];
+                if (transactions.length === 0) {
+                    console.log("No block info transactions");
+                    return;
+                }
+            const transactionPromises = transactions.map(async (tx) => {
                 // console.log('tx.hash >>', tx.hash, 'blockId >>>', blockId);
                 const data: blocks_trnx = {
                     block_number: blockId,
                     tx_id: tx.hash || '',
-                    value: tx.value || '',
+                    value: tx.value ? tx.value.toString() : '',
                     fromAddress: tx.from || '',
                     toAddress: tx.to || '',
                     retry_count: 0,
@@ -227,26 +228,35 @@ class Pol_block_process {
     }
     public async testingNode() {
         try {
+            const provider = Blockchain_Helper.provider;
+            
             // Get Block Number
-            let { getBlockNumber } = Blockchain_Helper.Web3.eth;
-            let latestBlock = await getBlockNumber();
-            console.log("Block  number>>", latestBlock)
+            const latestBlock = await provider.getBlockNumber();
+            console.log("Block number>>", latestBlock);
 
-            // Get Block Info
-            const { getBlock } = Blockchain_Helper.Web3.eth;
-            const blockInfo = await getBlock(latestBlock, true);
-            console.log("blockInfo>>", blockInfo)
+            const blockInfo = await provider.getBlock(latestBlock, true);
+            console.log("blockInfo>>", blockInfo);
 
-            // Get Block Receipt
-            const { getTransactionReceipt } = Blockchain_Helper.Web3.eth;
-            const txReceipt = await getTransactionReceipt(blockInfo.transactions[0].hash);
-            console.log("txreceipt>>", txReceipt)
-
-            // Get more details which was reduced
-            const { getTransaction } = Blockchain_Helper.Web3.eth;
-            const transaction = await getTransaction(blockInfo.transactions[0].hash);
-            console.log("transaction>>", transaction)
-
+            if (blockInfo && blockInfo.transactions.length > 0) {
+                let firstTxHash: string;
+                const firstTx = blockInfo.transactions[0];
+                
+                if (typeof firstTx === 'string') {
+                    firstTxHash = firstTx;
+                } else {
+                    // Assert the type to access the hash property safely
+                    firstTxHash = (firstTx as ethers.TransactionResponse).hash;
+                }
+                // Get Block Receipt
+                const txReceipt = await provider.getTransactionReceipt(firstTxHash);
+                console.log("txreceipt>>", txReceipt);
+                
+                // Get more details (not reduced in ethers.js)
+                const transaction = await provider.getTransaction(firstTxHash);
+                console.log("transaction>>", transaction);
+            } else {
+                console.log("No transactions found in the block");
+            }
         } catch (err: any) {
             console.error("Error in testingNode>>", err)
         }

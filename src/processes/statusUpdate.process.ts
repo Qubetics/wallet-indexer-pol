@@ -7,6 +7,8 @@ import polProcessHelper from "./process.helper";
 import { Op } from "sequelize";
 import { global_helper } from "../helpers/global_helper";
 import kafkaHelper from "../config/kafka.helper";
+import { ethers } from "ethers";
+
 class PolTxStatusUpdateProcess {
   // public startTxStatusUpdateQueue = async () => {
   //   await rabbitMq.consumeQueue(
@@ -31,34 +33,34 @@ class PolTxStatusUpdateProcess {
 
   public getTx = async (data: { tx_id: string; coin_id: number }) => {
     console.log('Pending data >>>>>>>', data);
-    const { getTransaction, getTransactionReceipt } = Blockchain_Helper.Web3.eth;
     try {
-      const transaction = await getTransaction(data.tx_id);
+      // Initialize provider
+      const provider = Blockchain_Helper.provider;
+      const transaction = await provider.getTransaction(data.tx_id);
       if (transaction && transaction?.blockNumber) {
-        const transactionReceipt = await getTransactionReceipt(data.tx_id);
-        let gasReverted: number | undefined;
-        const gasUsed = transactionReceipt.gasUsed
-          ? transactionReceipt.gasUsed
-          : 0;
-        const gasPrice = parseFloat(transaction.gasPrice) || 0;
-        const gasTotal = transaction.gas || 0;
-        const gasInPol: number = Number(await Blockchain_Helper.convertWeiToPOL(
-          await Utility_Helper.bigNumberSafeMath(
-            gasUsed, '*', gasPrice
-          ))
-        );
+        const transactionReceipt = await provider.getTransactionReceipt(data.tx_id);
 
-        if (gasTotal > 0 && gasUsed > 0) {
-          const gasDiff = gasTotal - gasUsed;
-          gasReverted = gasPrice * gasDiff;
-        }
+        let gasReverted: number | undefined;
+        const gasUsed = transactionReceipt?.gasUsed || BigInt(0);
+          const gasPrice = transaction.gasPrice || BigInt(0);
+          const gasTotal = transaction.gasLimit || BigInt(0);
+          
+          // Calculate gas in ETH (using ethers v6 formatting utils)
+          const gasInPol: number = Number(
+              ethers.formatEther(gasUsed * gasPrice)
+          );
+          
+          if (gasTotal > BigInt(0) && gasUsed > BigInt(0)) {
+              const gasDiff = gasTotal - gasUsed;
+              gasReverted = Number(ethers.formatEther(gasPrice * gasDiff));
+          }
 
         if (transactionReceipt.status && transaction.blockHash != null) {
           const txUpdate = {
             coin_id: data.coin_id,
             status: "success",
             txid: transaction.hash,
-            gasReverted: gasReverted,
+            gasReverted: gasReverted !== undefined ? gasReverted : undefined,
             fromAddress: transactionReceipt.from.toLowerCase(),
             tx_fee: gasInPol
           };
@@ -68,7 +70,7 @@ class PolTxStatusUpdateProcess {
             coin_id: data.coin_id,
             status: "failed",
             txid: transaction.hash,
-            gasReverted: gasReverted,
+            gasReverted: gasReverted !== undefined ? gasReverted : undefined,
             fromAddress: transactionReceipt.from.toLowerCase(),
             tx_fee: gasInPol
           };
