@@ -106,14 +106,15 @@ class queue_transactions {
         try {
             if (txReceipt.status === 0 && txReceipt.logs.length > 0) {
                 const gasUsed = txReceipt.gasUsed ? Number(txReceipt.gasUsed) : 0;
-                const hexToNumberGasPrice: any = txReceipt?.gasPrice ? Number(txReceipt.gasPrice) : 0;
-                const gasPrice = Number(ethers.formatUnits(hexToNumberGasPrice.toString(), 9));
+                const gasPrice: any = txReceipt?.gasPrice ? Number(txReceipt.gasPrice) : 0;
+                //const gasPrice = Number(ethers.formatUnits(hexToNumberGasPrice.toString(), 9));
+                const txFee = await Utility_Helper.bigNumberSafeMath(
+                    gasUsed, '*', gasPrice
+                )
 
                 // const gasUsed = txReceipt.gasUsed ? txReceipt.gasUsed : 0;
                 // const effectiveGasPrice: number = txReceipt?.effectiveGasPrice ? txReceipt?.effectiveGasPrice : 0;
-                const gasInPol = await Blockchain_Helper.convertWeiToPOL(
-                    await Utility_Helper.bigNumberSafeMath(gasUsed, '*', gasPrice)
-                );
+                const gasInPol = await Blockchain_Helper.convertWeiToPOL(txFee);
                 for await (const log of txReceipt.logs) {
                     const isToken: any = await polProcessHelper.checkIfContract(log.address);
                     // console.log('isToken >>>', log.address, '-----', data.tx_id, isToken);
@@ -172,14 +173,13 @@ class queue_transactions {
                 data.block_number
             ) {
                 const gasUsed = txReceipt.gasUsed ? txReceipt.gasUsed : 0;
-                const effectiveGasPrice: number = Number(txReceipt.gasPrice) || 0;
-                const gasPrice = Number(ethers.formatUnits(effectiveGasPrice.toString(), 9));
-                const gasInPol = await Blockchain_Helper.convertWeiToPOL(
-                    await Utility_Helper.bigNumberSafeMath(
-                        gasUsed, '*', gasPrice
-                    )
-                );
-                console.log('data.value >>.', data.value);
+                const gasPrice: number = Number(txReceipt.gasPrice) || 0;
+                //const gasPrice = Number(ethers.formatUnits(effectiveGasPrice.toString(), 9));
+                const txFee = await Utility_Helper.bigNumberSafeMath(
+                    gasUsed, '*', gasPrice
+                )
+                const gasInPol = await Blockchain_Helper.convertWeiToPOL(txFee);
+                // console.log('data.value >>.', data.value);?\
                 // const fixedValueString: string = await Utility_Helper.exponentialToDecimal(Number(data.value));
                 // const amount = Number(ethers.formatEther(fixedValueString));
 
