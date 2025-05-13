@@ -6,7 +6,7 @@ import polProcessHelper from "./process.helper";
 import { TxType } from "../types/ERC20Tokens.types";
 import { TrnxTypeEnum } from "../enum";
 import { global_helper } from "../helpers/global_helper";
-import { ethers } from "ethers";
+import { ethers, TransactionReceipt } from "ethers";
 
 class queue_transactions {
     public approval: string | null;
@@ -77,7 +77,7 @@ class queue_transactions {
     public async read_trnx(data: blocks_trnx) {
         try {
             // console.log("consume started>>>", data)
-            const txReceipt = await Blockchain_Helper.provider.getTransactionReceipt(data.tx_id);
+            const txReceipt: TransactionReceipt | null = await Blockchain_Helper.provider.getTransactionReceipt(data.tx_id);
             if (txReceipt == null) {
                 if (Number(data.retry_count) < 6) {
                     data.retry_count = Number(data.retry_count) + 1;
@@ -86,9 +86,9 @@ class queue_transactions {
                 }
             }
 
-            if (txReceipt?.status === false && txReceipt !== null) {
+            if (txReceipt?.status === 0 && txReceipt !== null) {
                 console.log("(txReceipt.status === false && txReceipt !== null")
-            } else {
+            } else if (txReceipt) {
                 // console.log('in build function >>>', data.tx_id);
                 await pol_tx_status_deposit_withdraw.buildTx(txReceipt, data)
             }
@@ -101,13 +101,17 @@ class queue_transactions {
             }
         }
     }
-    public async buildTx(txReceipt: any, data: blocks_trnx) {
+    public async buildTx(txReceipt: TransactionReceipt, data: blocks_trnx) {
         try {
-            if (txReceipt.status == true && txReceipt.logs.length > 0) {
-                const gasUsed = txReceipt.gasUsed ? txReceipt.gasUsed : 0;
-                const effectiveGasPrice: number = txReceipt?.effectiveGasPrice ? txReceipt?.effectiveGasPrice : 0;
+            if (txReceipt.status === 0 && txReceipt.logs.length > 0) {
+                const gasUsed = txReceipt.gasUsed ? Number(txReceipt.gasUsed) : 0;
+                const hexToNumberGasPrice: any = txReceipt?.gasPrice ? Number(txReceipt.gasPrice) : 0;
+                const gasPrice = Number(ethers.formatUnits(hexToNumberGasPrice.toString(), 9));
+
+                // const gasUsed = txReceipt.gasUsed ? txReceipt.gasUsed : 0;
+                // const effectiveGasPrice: number = txReceipt?.effectiveGasPrice ? txReceipt?.effectiveGasPrice : 0;
                 const gasInPol = await Blockchain_Helper.convertWeiToPOL(
-                    await Utility_Helper.bigNumberSafeMath(gasUsed, '*', effectiveGasPrice)
+                    await Utility_Helper.bigNumberSafeMath(gasUsed, '*', gasPrice)
                 );
                 for await (const log of txReceipt.logs) {
                     const isToken: any = await polProcessHelper.checkIfContract(log.address);
@@ -152,26 +156,28 @@ class queue_transactions {
             await global_helper.save_error_logs('Pol_buildTx', error.message)
         }
     };
-    public async check_pol_deposit(data: blocks_trnx, txReceipt: any) {
+    public async check_pol_deposit(data: blocks_trnx, txReceipt: TransactionReceipt) {
         try {
             // console.log('in check_pol_deposit function >>>', data.tx_id);
-            const gasUsed = txReceipt.gasUsed ? txReceipt.gasUsed : 0;
-            const effectiveGasPrice: number = txReceipt?.effectiveGasPrice ? txReceipt?.effectiveGasPrice : 0;
-            const gasInPol = await Blockchain_Helper.convertWeiToPOL(
-                await Utility_Helper.bigNumberSafeMath(
-                    gasUsed, '*', effectiveGasPrice
-                )
-            );
+
             // const { getTransaction } = Blockchain_Helper.Web3.eth;
             // const transaction = await getTransaction(txId);
 
             /** for check the pol deposit */
             if (
-                txReceipt.status == true,
+                // txReceipt.status == true,
                 data.value !== '0' &&
                 data.toAddress &&
                 data.block_number
             ) {
+                const gasUsed = txReceipt.gasUsed ? txReceipt.gasUsed : 0;
+                const effectiveGasPrice: number = Number(txReceipt.gasPrice) || 0;
+                const gasPrice = Number(ethers.formatUnits(effectiveGasPrice.toString(), 9));
+                const gasInPol = await Blockchain_Helper.convertWeiToPOL(
+                    await Utility_Helper.bigNumberSafeMath(
+                        gasUsed, '*', gasPrice
+                    )
+                );
                 const polValue = await Blockchain_Helper.convertWeiToPOL((data.value ? data.value : 0));
                 const amount = parseFloat(polValue.toString());
                 const txData: TxType = {

@@ -91,16 +91,16 @@ class Pol_block_process {
                 return;
             }
             const transactions = blockInfo.prefetchedTransactions || [];
-                if (transactions.length === 0) {
-                    console.log("No block info transactions");
-                    return;
-                }
+            if (transactions.length === 0) {
+                console.log("No block info transactions");
+                return;
+            }
             const transactionPromises = transactions.map(async (tx) => {
                 // console.log('tx.hash >>', tx.hash, 'blockId >>>', blockId);
                 const data: blocks_trnx = {
                     block_number: blockId,
                     tx_id: tx.hash || '',
-                    value: tx.value ? tx.value.toString() : '',
+                    value: tx.value.toString(),
                     fromAddress: tx.from || '',
                     toAddress: tx.to || '',
                     retry_count: 0,
@@ -229,7 +229,7 @@ class Pol_block_process {
     public async testingNode() {
         try {
             const provider = Blockchain_Helper.provider;
-            
+
             // Get Block Number
             const latestBlock = await provider.getBlockNumber();
             console.log("Block number>>", latestBlock);
@@ -240,7 +240,7 @@ class Pol_block_process {
             if (blockInfo && blockInfo.transactions.length > 0) {
                 let firstTxHash: string;
                 const firstTx = blockInfo.transactions[0];
-                
+
                 if (typeof firstTx === 'string') {
                     firstTxHash = firstTx;
                 } else {
@@ -250,7 +250,7 @@ class Pol_block_process {
                 // Get Block Receipt
                 const txReceipt = await provider.getTransactionReceipt(firstTxHash);
                 console.log("txreceipt>>", txReceipt);
-                
+
                 // Get more details (not reduced in ethers.js)
                 const transaction = await provider.getTransaction(firstTxHash);
                 console.log("transaction>>", transaction);
