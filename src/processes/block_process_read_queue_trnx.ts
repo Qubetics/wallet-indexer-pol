@@ -78,12 +78,13 @@ class queue_transactions {
         try {
             // console.log("consume started>>>", data)
             const txReceipt: TransactionReceipt | null = await Blockchain_Helper.provider.getTransactionReceipt(data.tx_id);
-            if (txReceipt == null) {
-                if (Number(data.retry_count) < 6) {
-                    data.retry_count = Number(data.retry_count) + 1;
-                    // rabbitMq.send_tx_to_queue(config.TRANSACTIONS.bsc_behined_transactions, Buffer.from(JSON.stringify(data)))
-                    await kafkaHelper.produceMessage(this.pol_behind_block_tx_topic, data)
-                }
+            if (txReceipt == null && Number(data.retry_count) < 6) {
+                // if () {
+                data.retry_count = Number(data.retry_count) + 1;
+                // rabbitMq.send_tx_to_queue(config.TRANSACTIONS.bsc_behined_transactions, Buffer.from(JSON.stringify(data)))
+                await kafkaHelper.produceMessage(this.pol_behind_block_tx_topic, data)
+                return false;
+                // }
             }
 
             if (txReceipt?.status === 0 && txReceipt !== null) {
@@ -178,6 +179,10 @@ class queue_transactions {
                         gasUsed, '*', gasPrice
                     )
                 );
+                console.log('data.value >>.', data.value);
+                // const fixedValueString: string = await Utility_Helper.exponentialToDecimal(Number(data.value));
+                // const amount = Number(ethers.formatEther(fixedValueString));
+
                 const polValue = await Blockchain_Helper.convertWeiToPOL((data.value ? data.value : 0));
                 const amount = parseFloat(polValue.toString());
                 const txData: TxType = {
