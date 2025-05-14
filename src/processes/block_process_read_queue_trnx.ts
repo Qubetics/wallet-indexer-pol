@@ -34,8 +34,6 @@ class queue_transactions {
 
         await consumer.run({
             eachMessage: ({ topic, partition, message }: { topic: any, partition: any, message: any }) => {
-                // console.log("🚀 ~ startBlockTxQueue topic", topic);
-                // console.log("🚀 ~ startBlockTxQueue message.value", message.value.toString());
                 this.read_trnx(JSON.parse(message.value.toString()))
             }
         }).catch((err: Error) => {
@@ -49,48 +47,25 @@ class queue_transactions {
 
         await consumer.run({
             eachMessage: ({ topic, partition, message }: { topic: any, partition: any, message: any }) => {
-                // console.log("🚀 ~ startBehindBlockTxQueue topic", topic);
-                // console.log("🚀 ~ startBehindBlockTxQueue message.value", message.value.toString());
                 this.read_trnx(JSON.parse(message.value.toString()))
             }
         }).catch((err: Error) => {
             console.log("🔥 ~ startBehindBlockTxQueue consumer error", err);
         });
     };
-    // public async consume_queue_trnx() {
-    //     // Latest transactions
-    //     rabbitMq.only_assert_queue(config.TRANSACTIONS.pol_block_topic);
-    //     console.error(`RABBITMQ_BLOCK_ALL_TRNX_PROCESS >>>`, config.TRANSACTIONS.pol_all_blocks);
-    //     //rabbitMq.only_consume_queue(config.TRANSACTIONS.pol_all_blocks, this.read_trnx);
 
-    //     for (let i = 1; i <= Number(config.TRANSACTIONS.pol_transaction_consumer_count); i++) {
-    //         rabbitMq.only_consume_queue(config.TRANSACTIONS.pol_all_blocks, this.read_trnx);
-    //         // RabbitMq.consumeQueue(this.RABBITMQ_BLOCK_ALL_TRNX_PROCESS, this.GetTxDetail);
-    //     }
-    //     //==========================================================
-    //     // Behined transactions
-    //     rabbitMq.only_assert_queue(config.TRANSACTIONS.pol_behined_transactions);
-    //     console.error(`RABBITMQ_BLOCK_ALL_TRNX_PROCESS >>>`, config.TRANSACTIONS.pol_behined_transactions);
-    //     rabbitMq.only_consume_queue(config.TRANSACTIONS.pol_behined_transactions, this.read_trnx);
-    //     //==========================================================
-    // }
     public async read_trnx(data: blocks_trnx) {
         try {
-            // console.log("consume started>>>", data)
             const txReceipt: TransactionReceipt | null = await Blockchain_Helper.provider.getTransactionReceipt(data.tx_id);
             if (txReceipt == null && Number(data.retry_count) < 6) {
-                // if () {
                 data.retry_count = Number(data.retry_count) + 1;
-                // rabbitMq.send_tx_to_queue(config.TRANSACTIONS.bsc_behined_transactions, Buffer.from(JSON.stringify(data)))
                 await kafkaHelper.produceMessage(this.pol_behind_block_tx_topic, data)
                 return false;
-                // }
             }
 
             if (txReceipt?.status === 0 && txReceipt !== null) {
                 console.log("(txReceipt.status === false && txReceipt !== null")
             } else if (txReceipt) {
-                // console.log('in build function >>>', data.tx_id);
                 await pol_tx_status_deposit_withdraw.buildTx(txReceipt, data)
             }
         } catch (error: any) {
@@ -107,17 +82,13 @@ class queue_transactions {
             if (txReceipt.status === 0 && txReceipt.logs.length > 0) {
                 const gasUsed = txReceipt.gasUsed ? Number(txReceipt.gasUsed) : 0;
                 const gasPrice: any = txReceipt?.gasPrice ? Number(txReceipt.gasPrice) : 0;
-                //const gasPrice = Number(ethers.formatUnits(hexToNumberGasPrice.toString(), 9));
                 const txFee = await Utility_Helper.bigNumberSafeMath(
                     gasUsed, '*', gasPrice
                 )
 
-                // const gasUsed = txReceipt.gasUsed ? txReceipt.gasUsed : 0;
-                // const effectiveGasPrice: number = txReceipt?.effectiveGasPrice ? txReceipt?.effectiveGasPrice : 0;
                 const gasInPol = await Blockchain_Helper.convertWeiToPOL(txFee);
                 for await (const log of txReceipt.logs) {
                     const isToken: any = await polProcessHelper.checkIfContract(log.address);
-                    // console.log('isToken >>>', log.address, '-----', data.tx_id, isToken);
                     if (isToken !== null && log.topics[2] !== undefined) {
                         if (log?.topics && log?.topics[0] == this.approval) {
                             continue;
@@ -150,7 +121,6 @@ class queue_transactions {
                     }
                 }
             } else {
-                // console.log('in build function222 >>>', data.tx_id);
                 await pol_tx_status_deposit_withdraw.check_pol_deposit(data, txReceipt);
             }
         } catch (error: any) {
@@ -160,28 +130,18 @@ class queue_transactions {
     };
     public async check_pol_deposit(data: blocks_trnx, txReceipt: TransactionReceipt) {
         try {
-            // console.log('in check_pol_deposit function >>>', data.tx_id);
-
-            // const { getTransaction } = Blockchain_Helper.Web3.eth;
-            // const transaction = await getTransaction(txId);
-
             /** for check the pol deposit */
             if (
-                // txReceipt.status == true,
                 data.value !== '0' &&
                 data.toAddress &&
                 data.block_number
             ) {
                 const gasUsed = txReceipt.gasUsed ? txReceipt.gasUsed : 0;
                 const gasPrice: number = Number(txReceipt.gasPrice) || 0;
-                //const gasPrice = Number(ethers.formatUnits(effectiveGasPrice.toString(), 9));
                 const txFee = await Utility_Helper.bigNumberSafeMath(
                     gasUsed, '*', gasPrice
                 )
                 const gasInPol = await Blockchain_Helper.convertWeiToPOL(txFee);
-                // console.log('data.value >>.', data.value);?\
-                // const fixedValueString: string = await Utility_Helper.exponentialToDecimal(Number(data.value));
-                // const amount = Number(ethers.formatEther(fixedValueString));
 
                 const polValue = await Blockchain_Helper.convertWeiToPOL((data.value ? data.value : 0));
                 const amount = parseFloat(polValue.toString());
@@ -232,9 +192,6 @@ class queue_transactions {
     public async addTxToQueue(data: TxType, queueName: string) {
         try {
             await kafkaHelper.produceMessage(queueName, data)
-            //rabbitMq.send_tx_to_queue(queueName, Buffer.from(JSON.stringify(data)))
-            // await rabbitMq.assertQueue(queueName);
-            // await rabbitMq.sendToQueue(queueName, Buffer.from(JSON.stringify(data)));
         } catch (err: any) {
             console.error("addTxToQueue", (err as Error).message);
             await global_helper.save_error_logs('POL_checkAddressInDB', err.message)

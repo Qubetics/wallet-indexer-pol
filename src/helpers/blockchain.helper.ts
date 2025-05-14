@@ -4,7 +4,6 @@ import { config } from '../config';
 import { ethers } from 'ethers';
 
 class BlockchainHelper {
-    // public REDIS_TOKENS: any = CONFIG.REDISKEYS.TOKENS;
     public provider: ethers.JsonRpcProvider;
   
     constructor() {
@@ -83,8 +82,6 @@ class BlockchainHelper {
             return 0;
         } catch (error) {
             console.error(`Pol_Helper ERC20_Token_Fetch_Balance error >>`, error);
-            // return 0;
-
             throw error;
         }
     }
@@ -105,7 +102,6 @@ class BlockchainHelper {
             return 0;
         } catch (error) {
             console.error(`Pol_Helper ERC20_Token_Fetch_Balance error >>`, error);
-            // return 0;
             throw error;
         }
     }
@@ -114,7 +110,6 @@ class BlockchainHelper {
     ) => {
         try {
             const balance = await this.provider.getBalance(address);
-            // const etherBalance = ethers.formatEther(balance);  //// if you don't need the Utility_Helper:
             const tokenBalance = await Utility_Helper.bigNumberSafeMath(
                 balance.toString(),
                 "/",
@@ -124,8 +119,6 @@ class BlockchainHelper {
             return Number(coinBalance || 0);
         } catch (error: any) {
             console.error(`POL_Helper Coin_Fetch_Balance error >>`, error);
-            //return 0;
-
             throw error;
         }
     }
