@@ -1,20 +1,11 @@
 import { config } from "../config";
 import kafkaHelper from "../config/kafka.helper";
-// import rabbitMq from "../config/rabbitMq";
 import { Wallet_Helper } from "../helpers";
 import { WalletModel } from "../models";
 
 class UpdateBalanceController {
     public pol_pending_balance_update_topic = config.config.KAFKA_BALANCE.POL_PENDING_BALANCE_UPDATE_TOPIC;
 
-    // public async update_wallet_balance() {
-    //     console.log('config.BACKEND_WALLET_ADDRESSES', config.config.POL_ADDRESSES_PENDING_BALANCE_UPDATE);
-    //     await rabbitMq.consumeQueue(
-    //         config.config.POL_ADDRESSES_PENDING_BALANCE_UPDATE || '',
-    //         this.updateBalance
-    //     )
-
-    // }
     public update_wallet_balance = async () => {
         let consumer = await kafkaHelper.kafka.consumer({ groupId: config.config.KAFKA_BALANCE.POL_PENDING_BALANCE_UPDATE_GROUP_ID });
         await consumer.subscribe({ topic: this.pol_pending_balance_update_topic, fromBeginning: true });
@@ -46,13 +37,6 @@ class UpdateBalanceController {
                             queue_count: data.queue_count + 1
                         });
                     }
-                    // await rabbitMq.assertQueue(config.config.POL_ADDRESSES_PENDING_BALANCE_UPDATE);
-                    // await rabbitMq.sendToQueue(config.config.POL_ADDRESSES_PENDING_BALANCE_UPDATE, Buffer.from(JSON.stringify(
-                    //     {
-                    //         coin_data: data.coin_data,
-                    //         wallet_address: data.wallet_address,
-                    //         queue_count: data.queue_count + 1
-                    //     })))
                 }
 
                 console.log("balance:::", balance);
@@ -65,9 +49,6 @@ class UpdateBalanceController {
             console.error("Error in updateBalance", err)
         }
     }
-
-
-
 }
 
 
