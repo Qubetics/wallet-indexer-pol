@@ -7,6 +7,7 @@ import { Op } from "sequelize";
 import { global_helper } from "../helpers/global_helper";
 import kafkaHelper from "../config/kafka.helper";
 import { ethers, TransactionReceipt, TransactionResponse } from "ethers";
+import { pending_trnx } from "../interfaces/global_helper";
 
 class PolTxStatusUpdateProcess {
 
@@ -24,7 +25,7 @@ class PolTxStatusUpdateProcess {
     });
   };
 
-  public getTx = async (data: { tx_id: string; coin_id: number }) => {
+  public getTx = async (data: pending_trnx) => {
     console.log('Pending data >>>>>>>', data);
     try {
       // Initialize provider
@@ -51,7 +52,12 @@ class PolTxStatusUpdateProcess {
 
         if (transactionReceipt && transactionReceipt?.status && transaction?.blockHash != null) {
           const txUpdate = {
-            coin_id: data.coin_id,
+            coin: {
+              coin_id: data.coin_id,
+              is_token: data.is_token,
+              token_type: data.token_type,
+              token_address: data.token_address,
+            },
             status: "success",
             txid: transaction.hash,
             gasReverted: gasReverted !== undefined ? gasReverted : undefined,
@@ -61,7 +67,12 @@ class PolTxStatusUpdateProcess {
           await this.sendTxUpdate(txUpdate);
         } else if (transactionReceipt && transactionReceipt?.status === 0) {
           const txUpdate = {
-            coin_id: data.coin_id,
+            coin: {
+              coin_id: data.coin_id,
+              is_token: data.is_token,
+              token_type: data.token_type,
+              token_address: data.token_address,
+            },
             status: "failed",
             txid: transaction.hash,
             gasReverted: gasReverted !== undefined ? gasReverted : undefined,
@@ -77,7 +88,12 @@ class PolTxStatusUpdateProcess {
   };
 
   public sendTxUpdate = async (txData: {
-    coin_id: number;
+    coin: {
+      coin_id: number,
+      is_token: boolean,
+      token_type: string | null,
+      token_address: string
+    };
     status: string;
     txid: string;
     gasReverted: number | undefined;
@@ -85,16 +101,23 @@ class PolTxStatusUpdateProcess {
     tx_fee: number
   }) => {
     try {
-      let coin_data: any = await polProcessHelper.CoinByCoinId(txData.coin_id);
+      let coin_data: any = {};
+      if (!txData.coin?.is_token) {
+        console.log('in case of coin');
+        coin_data = await polProcessHelper.checkIfContract('NativeCoin');
+      } else if (txData.coin?.token_type == TokenStandard.ERC20) {
+        coin_data = await polProcessHelper.checkIfContract(txData.coin.token_address);
+      }
+      //let coin_data: any = await polProcessHelper.CoinByCoinId(txData.coin_id);
       const trx_data = {
-        coin_id: txData?.coin_id,
+        coin_id: txData?.coin.coin_id,
         status: txData?.status,
         txid: txData?.txid,
         gas_reverted: txData?.gasReverted,
         tx_fee: txData?.tx_fee,
         fromAddress: txData?.fromAddress,
         coin: {
-          coin_id: txData?.coin_id,
+          coin_id: txData?.coin.coin_id,
           is_token: coin_data.is_token,
           token_type: coin_data.token_type,
           coin_symbol: coin_data.coin_symbol,
@@ -139,7 +162,7 @@ class PolTxStatusUpdateProcess {
           if (AddressWithdraw) {
             /** update withdraw user pol balance */
             if (tx_type !== TrnxTypeEnum.DAPP) {
-              const native_coin: any = await polProcessHelper.NativeCoinByCoinFamily(coin_family);
+              const native_coin: any = await polProcessHelper.checkIfContract('NativeCoin');
               await Wallet_Helper.Update_Balance(from_address, native_coin);
               if (trx_data?.coin?.is_token === BooleanEnum.true && trx_data.coin?.token_type.toLowerCase() === TokenStandard.ERC20.toLowerCase()) {
                 /** Update User ERC20 Token Balance */

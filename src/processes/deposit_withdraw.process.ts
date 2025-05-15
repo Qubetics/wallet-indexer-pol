@@ -50,7 +50,7 @@ class PolDepositWithdrawProcess {
       } else if (data.isNFTToken) {
         coin_data = data.isNFTToken;
       } else {
-        coin_data = await polProcessHelper.NativeCoinByCoinFamily(CoinFamilyEnum.POL);
+        coin_data = await polProcessHelper.checkIfContract('NativeCoin');
       }
       const webhookTx: WebHookTxType = {
         coin: coin_data,
@@ -223,7 +223,7 @@ class PolDepositWithdrawProcess {
         );
         if (coin.is_token) {
           const native_coin: any =
-            await polProcessHelper.NativeCoinByCoinFamily(coin.coin_family);
+            await polProcessHelper.checkIfContract('NativeCoin');
           await Wallet_Helper.Update_Balance(
             from_address, /// wallet_address,
             native_coin /// coin
