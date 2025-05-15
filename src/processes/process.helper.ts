@@ -122,7 +122,7 @@ class PolProcessHelper {
       for await (let token of tokens) {
         let findTokenData = await this.getKeyValuePair(
           `${config.TOKEN_TYPE_POL}`,
-          token.token_address.toUpperCase()
+          token.token_address == null ? 'NativeCoin'.toUpperCase() : token.token_address.toUpperCase(),
         );
         if (!findTokenData) {
           this.setKeyValuePair(
@@ -166,10 +166,10 @@ class PolProcessHelper {
 
   public checkIfContract = async (address: string) => {
     try {
-      let token_data: any = await this.getKeyValuePair(config.TOKEN_TYPE_POL, address);
-      if (token_data) {
-        console.log("token_data>>>>>>>>", token_data)
-      }
+      const token_data: any = await this.getKeyValuePair(config.TOKEN_TYPE_POL, address);
+      // if (token_data) {
+      //   console.log("token_data>>>>>>>>", token_data)
+      // }
       return JSON.parse(token_data);
     } catch (err: any) {
       console.error('check_our_wallet_address >>>>>', err);
@@ -228,9 +228,9 @@ class PolProcessHelper {
   public check_our_wallet_address = async (address: string) => {
     try {
       let wallet_data: any = await this.getKeyValuePair(config.POL_WALLET_ADDRESS, address);
-      if (wallet_data) {
-        console.log("wallet_Data>>>>>>>>", wallet_data)
-      }
+      // if (wallet_data) {
+      //   console.log("wallet_Data>>>>>>>>", wallet_data)
+      // }
       return JSON.parse(wallet_data);
     } catch (error: any) {
       console.error('check_our_wallet_address >>>>>', error);
