@@ -105,7 +105,7 @@ class PolTxStatusUpdateProcess {
       if (!txData.coin?.is_token) {
         console.log('in case of coin');
         coin_data = await polProcessHelper.checkIfContract('NativeCoin');
-      } else if (txData.coin?.token_type == TokenStandard.ERC20) {
+      } else if (txData.coin?.token_type?.toLowerCase() == TokenStandard.ERC20) {
         coin_data = await polProcessHelper.checkIfContract(txData.coin.token_address);
       }
       //let coin_data: any = await polProcessHelper.CoinByCoinId(txData.coin_id);
