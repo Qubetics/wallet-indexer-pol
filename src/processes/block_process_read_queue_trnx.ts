@@ -80,13 +80,6 @@ class queue_transactions {
     public async buildTx(txReceipt: TransactionReceipt, data: blocks_trnx) {
         try {
             if (txReceipt.status !== 0 && txReceipt.logs.length > 0) {
-                const gasUsed = txReceipt.gasUsed ? Number(txReceipt.gasUsed) : 0;
-                const gasPrice: any = txReceipt?.gasPrice ? Number(txReceipt.gasPrice) : 0;
-                const txFee = await Utility_Helper.bigNumberSafeMath(
-                    gasUsed, '*', gasPrice
-                )
-
-                const gasInPol = await Blockchain_Helper.convertWeiToPOL(txFee);
                 for await (const log of txReceipt.logs) {
                     // console.log('isToken >>>', log.address, '-----', data.tx_id, isToken);
                     if (log?.topics && log.topics[2] !== undefined && log?.topics[0] !== undefined) {
@@ -95,6 +88,14 @@ class queue_transactions {
                         } else if (log?.topics[0] == this.transfer) {
                             const isToken: any = await polProcessHelper.checkIfContract(log.address);
                             if (isToken) {
+                                const gasUsed = txReceipt.gasUsed ? Number(txReceipt.gasUsed) : 0;
+                                const gasPrice: any = txReceipt?.gasPrice ? Number(txReceipt.gasPrice) : 0;
+                                const txFee = await Utility_Helper.bigNumberSafeMath(
+                                    gasUsed, '*', gasPrice
+                                )
+
+                                const gasInPol = await Blockchain_Helper.convertWeiToPOL(txFee);
+                                
                                 const decimalPrecision = isToken.decimals.toString().length - 1;
                                 let finalAmount = await Utility_Helper.bigNumberSafeMath(log.data, '/', Math.pow(10, decimalPrecision))
                                 finalAmount = await Utility_Helper.exponentialToDecimal(finalAmount)
