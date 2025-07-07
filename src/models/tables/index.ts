@@ -1,27 +1,27 @@
-import CoinsModel from './model.coins';
-import DeviceTokenModel from './model.deviceToken';
-import NotificationModel from './model.notifications';
-import TrnxHistoryModel from './model.trnxHistory';
-import PolOldBLockModel from './model.eth_old_block';
-import SettingsModel from './model.settings';
-import CatchErrorMsgsModel from './model_catch_error_logs';
-import RewardHistoryModel from './model.reward_history';
-import ReferralModel from './model.referral';
-import WalletModel from './model.wallets';
-import CoinPriceInFiatModel from './model.coin_price_fiat';
-import CustomTokennModel from './model.custom_tokens';
+import coinsModel from './model.coins';
+import deviceTokenModel from './model.deviceToken';
+import notificationModel from './model.notifications';
+import trnxHistoryModel from './model.trnxHistory';
+import polOldBLockModel from './model.ethOldBlock';
+// import SettingsModel from './model.settings';
+import catchErrorMsgsModel from './model.catchErrorLogs';
+// import RewardHistoryModel from './model.rewardHistory';
+// import ReferralModel from './model.referral';
+import walletModel from './model.wallets';
+// import CoinPriceInFiatModel from './model.coinPriceFiat';
+import customTokennModel from './model.customTokens';
 
 export {
-    CoinsModel,
-    DeviceTokenModel,
-    NotificationModel,
-    TrnxHistoryModel,
-    PolOldBLockModel,
-    SettingsModel,
-    CatchErrorMsgsModel,
-    RewardHistoryModel,
-    ReferralModel,
-    WalletModel,
-    CoinPriceInFiatModel,
-    CustomTokennModel
+    coinsModel,
+    deviceTokenModel,
+    notificationModel,
+    trnxHistoryModel,
+    polOldBLockModel,
+    // SettingsModel,
+    catchErrorMsgsModel,
+    // RewardHistoryModel,
+    // ReferralModel,
+    walletModel,
+    // CoinPriceInFiatModel,
+    customTokennModel
 }

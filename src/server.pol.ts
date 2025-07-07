@@ -1,56 +1,68 @@
-import { polWithdrawDepositProcess, polPendingWithdrawalProcess, polTxStatusUpdateProcess, pol_blocks_process, pol_tx_status_deposit_withdraw, pol_balance_update } from "./processes/index.process"
+import kafkaHelper from "./config/kafka.helper";
+import { polWithdrawDepositProcess, polPendingWithdrawalProcess, polTxStatusUpdateProcess, polBlocksProcess, processedBlockTransactions, updateBalanceProcess } from "./processes/index.process"
 import schedule from "node-schedule";
 class POLStartProcess {
   constructor() {
-    this.read_block_process()
-    this.readSpecificBlock()
-    this.consume_read_block_queue()
-    this.polWithdrawDepositProcess();
-    this.getPendingWithdrawalTxProcess();
-    this.updateTxStatusProcess();
-    this.polUpdateBalance();
-    // this.testing_node()
+    this.connectKafka();
+    this.readBlockProcess();
+    this.readSpecificBlock();
+    this.consumeBlockTxQueue();
+    this.consumeBehindBlockTxQueue();
+    this.consumeWithdrawDepositTxsQueue();
+    this.internalTxsInQueue();
+    this.consumeInternalTxQueue();
+    this.consumeUpdateBalanceQueue();
   }
-  public read_block_process() {
-    schedule.scheduleJob("*/2 * * * * *", async function () {
-      await pol_blocks_process.getBlocks();
-      await pol_blocks_process.readBehindBlock()
+
+  public async connectKafka() {
+    await kafkaHelper.connect();
+  }
+
+  public readBlockProcess() {
+    schedule.scheduleJob("*/8 * * * * *", async function () {
+      await polBlocksProcess.readCurrentBlocks();
+      await polBlocksProcess.readBehindBlock()
     });
   }
   // public testing_node() {
   //   schedule.scheduleJob("*/2 * * * * *", async function () {
-  //     await pol_blocks_process.testingNode();
+  //     await polBlocksProcess.testingNode();
   //   });
   // }
   public readSpecificBlock() {
     schedule.scheduleJob('*/1 * * * *', async function () {
-      await pol_blocks_process.readSpecificBlock();
+      await polBlocksProcess.readSpecificBlock();
     })
   }
-  public consume_read_block_queue() {
+  public consumeBlockTxQueue() {
     setTimeout(async () => {
-      await pol_tx_status_deposit_withdraw.startBlockTxQueue();
-      await pol_tx_status_deposit_withdraw.startBehindBlockTxQueue();
+      await processedBlockTransactions.startBlockTxQueue();
+
     }, 10000);
   }
-  public async polWithdrawDepositProcess() {
+  public consumeBehindBlockTxQueue() {
+    setTimeout(async () => {
+      await processedBlockTransactions.startBehindBlockTxQueue();
+    }, 10000);
+  }
+  public async consumeWithdrawDepositTxsQueue() {
     setTimeout(async () => {
       await polWithdrawDepositProcess.startDepositQueue();
     }, 10000);
   }
-  public getPendingWithdrawalTxProcess() {
+  public internalTxsInQueue() {
     schedule.scheduleJob("*/10 * * * * *", async function () {
       await polPendingWithdrawalProcess.getTransactionFromDB();
     });
   }
-  public async updateTxStatusProcess() {
+  public async consumeInternalTxQueue() {
     setTimeout(async () => {
       await polTxStatusUpdateProcess.startTxStatusUpdateQueue();
     }, 10000);
   }
-  public async polUpdateBalance() {
+  public async consumeUpdateBalanceQueue() {
     setTimeout(async () => {
-      await pol_balance_update.default.update_wallet_balance();
+      await updateBalanceProcess.updateWalletBalance();
     }, 10000);
   }
 }

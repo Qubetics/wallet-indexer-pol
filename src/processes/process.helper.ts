@@ -1,12 +1,12 @@
 import database from "../config/db";
 import Sequelize, { QueryTypes } from "sequelize";
-import { CoinInterface, CoinsModel, PolOldBLockModel, WalletInterface } from "../models";
+import { CoinInterface, coinsModel, polOldBLockModel, WalletInterface } from "../models";
 import redisClient from "../config/redis";
 import { promisify } from "util";
 import { config } from "../config/config";
 import { BooleanEnum, CoinFamilyEnum } from "../enum";
-import { global_helper } from "../helpers/global_helper";
-import { Blockchain_Helper } from "../helpers";
+import { globalHelper } from "../helpers/global.helper";
+import { blockchainHelper } from "../helpers";
 import { Op } from "sequelize";
 
 class PolProcessHelper {
@@ -27,9 +27,25 @@ class PolProcessHelper {
       return null;
     }
   }
+
+  public async getMultipleKeyValuePairs(keyName: string, fields: string[]) {
+    try {
+      const upperFields = fields.map(f => f.toUpperCase());
+      return new Promise((resolve, reject) => {
+        redisClient.hmget(keyName, ...upperFields, (err, results) => {
+          if (err) reject(err);
+          else resolve(results);
+        });
+      });
+    } catch (err: any) {
+      console.error('getMultipleKeyValuePairs >>>>', err);
+      return null;
+    }
+  }
+
   public async setBlocks(field: string, key: string, minBlockConfirmation: number, newBlock: number | null) {
     try {
-      let latestBlock = await Blockchain_Helper.provider.getBlockNumber();
+      let latestBlock = await blockchainHelper.provider.getBlockNumber();
       latestBlock = latestBlock - minBlockConfirmation;
       if (newBlock) {
         if (newBlock < latestBlock) {
@@ -42,7 +58,7 @@ class PolProcessHelper {
       }
     } catch (err: any) {
       console.error("Error in  getBlocks", err)
-      await global_helper.save_error_logs('POL_setBlocks', err.message)
+      await globalHelper.saveErrorLogs('POL_setBlocks', err.message)
     }
   }
   public async setKeyValuePair(keyName: string, field: string, value: string) {
@@ -61,7 +77,7 @@ class PolProcessHelper {
           await this.setKeyValuePair(config.REDISKEYS.ALL_PROCESSES, config.REDISKEYS.NODE_ALERT_POL, setvalue.toString())
           if (Number(value_exist) == 0 || Number(value_exist) == 5 || Number(value_exist) == 10 || Number(value_exist) == 20 || Number(value_exist) == 50 || Number(value_exist) == 75 || Number(value_exist) == 100) {
             let email_body = `<p>Polygon Node Issue ${Number(value_exist)}</p><p>Current block running = ${current_block}.</p><p>Old Block = ${old_block}.</p>`;
-            await global_helper.send_mail(config.NODE_ISSUE_ALERT_EMAIL, email_body, `Polygon Node Issue ${Number(value_exist)}`);
+            await globalHelper.sendMail(config.NODE_ISSUE_ALERT_EMAIL, email_body, `Polygon Node Issue ${Number(value_exist)}`);
           } else {
             console.log("no email")
           }
@@ -73,11 +89,11 @@ class PolProcessHelper {
       }
       let dataToInsert = { block_number: old_block, coin_family: config.STATIC_COIN_FAMILY.POL, start_block: old_block, end_block: current_block, status: 0 }
       console.log("dataToInsert>>>>", dataToInsert)
-      await PolOldBLockModel.create(dataToInsert)
+      await polOldBLockModel.create(dataToInsert)
       return true;
     } catch (err: any) {
       console.error("💥 ~ Error in diff_blocks_add_in_redis.", err)
-      await global_helper.save_error_logs('POL_diff_blocks_add_in_db', err.message)
+      await globalHelper.saveErrorLogs('POL_diff_blocks_add_in_db', err.message)
       return false;
     }
   }
@@ -110,7 +126,7 @@ class PolProcessHelper {
 
   public fetchERC20Tokens = async () => {
     try {
-      let tokens: any = await CoinsModel.findAll({
+      let tokens: any = await coinsModel.findAll({
         attributes: ["coin_id", "coin_symbol", "coin_family", "is_token", "token_type", "decimals", "token_address", "for_swap", "added_by"],
         where: {
           coin_status: 1,
@@ -135,7 +151,7 @@ class PolProcessHelper {
       // redisClient.set(config.TOKEN_TYPE_POL || "", JSON.stringify(tokens));
     } catch (err: any) {
       console.error('fetchERC20Tokens >>>>>', err);
-      await global_helper.save_error_logs('POL_fetchERC20Tokens', err.message)
+      await globalHelper.saveErrorLogs('POL_fetchERC20Tokens', err.message)
     }
   }
 
@@ -275,7 +291,7 @@ class PolProcessHelper {
 
   public behindBlocks = async () => {
     try {
-      let behindBlocks: any = await PolOldBLockModel.findOne({
+      let behindBlocks: any = await polOldBLockModel.findOne({
         attributes: ['id', 'block_number', 'start_block', 'end_block'],
         where: { status: 0 },
         raw: true,

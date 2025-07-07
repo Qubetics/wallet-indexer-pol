@@ -1,13 +1,13 @@
 import axios from "axios";
 import { config } from "../config/config";
-import { CatchErrorMsgsModel, CoinInterface } from "../models";
-import { WalletModel, CustomTokennModel } from "../models/tables/index"
+import { CoinInterface } from "../models";
+import { walletModel, customTokennModel, catchErrorMsgsModel } from "../models/tables/index"
 import polProcessHelper from "../processes/process.helper";
 
-class Global_helper {
-    public async check_coin_in_wallet(wallet_address: string, coin: CoinInterface, balance: any) {
+class GlobalHelper {
+    public async checkCoinInWallet(wallet_address: string, coin: CoinInterface, balance: any) {
         try {
-            let wallet_data: any = await WalletModel.findOne({
+            let wallet_data: any = await walletModel.findOne({
                 attributes: ["balance", "user_id", "wallet_name"],
                 where: {
                     wallet_address: wallet_address,
@@ -27,7 +27,7 @@ class Global_helper {
                     default_wallet: 1,
                     status: 1
                 }
-                await WalletModel.create(data_obj)
+                await walletModel.create(data_obj)
             }
 
             console.log("wallet created>>")
@@ -35,7 +35,7 @@ class Global_helper {
                 console.log("coin.added_by exist", coin.added_by)
                 if (coin.added_by == 'user') {
                     console.log("added by user")
-                    let user_exist: any = await CustomTokennModel.findOne({
+                    let user_exist: any = await customTokennModel.findOne({
                         attributes: ["id"],
                         where: { user_id: wallet_data.user_id, coin_id: coin.coin_id },
                         raw: true
@@ -48,7 +48,7 @@ class Global_helper {
                             .toISOString()
                             .replace(/T/, " ")
                             .replace(/\..+/, "");
-                        await CustomTokennModel.create({
+                        await customTokennModel.create({
                             coin_id: coin.coin_id,
                             user_id: wallet_data.user_id,
                             created_at: currentUTCDate,
@@ -66,7 +66,7 @@ class Global_helper {
         }
 
     }
-    public async send_mail(email: string, text: string, subject: string) {
+    public async sendMail(email: string, text: string, subject: string) {
         try {
             const MAILGUN_API_KEY: string = `${config.MAILGUN.MAILGUN_API_KEY}`;
             const MAILGUN_DOMAIN: string = `${config.MAILGUN.MAILGUN_DOMAIN}`;
@@ -87,15 +87,15 @@ class Global_helper {
             });
         } catch (err: any) {
             console.error("send_mail", err)
-            await this.save_error_logs("MAILGUN_ERROR", err.message)
+            await this.saveErrorLogs("MAILGUN_ERROR", err.message)
         }
     }
-    public async save_error_logs(fn_name: string, error_message: any) {
+    public async saveErrorLogs(fn_name: string, error_message: any) {
         try {
             let value_exist: any = await polProcessHelper.getKeyValuePair(config.REDISKEYS.ALL_PROCESSES, config.REDISKEYS.POL_ERROR_LOGS)
             if (value_exist) {
                 if (Number(value_exist) == 0) {
-                    await CatchErrorMsgsModel.create({
+                    await catchErrorMsgsModel.create({
                         fx_name: fn_name,
                         error_msg: error_message || {}
                     })
@@ -108,8 +108,8 @@ class Global_helper {
                 console.log("value does not exist")
             }
         } catch (err: any) {
-            console.error("Error in save_error_logs", err)
+            console.error("Error in saveErrorLogs", err)
         }
     }
 }
-export let global_helper = new Global_helper();
+export let globalHelper = new GlobalHelper();

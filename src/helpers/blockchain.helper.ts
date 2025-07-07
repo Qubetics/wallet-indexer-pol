@@ -1,9 +1,9 @@
 import { BooleanEnum, TokenStandard } from "../enum";
-import { Utility_Helper } from "./utility.helper";
+import { utilityHelper } from "./utility.helper";
 import { config } from '../config';
 import { ethers } from 'ethers';
 
-class BlockchainHelper {
+class BlockChainHelper {
     public provider: ethers.JsonRpcProvider;
   
     constructor() {
@@ -21,12 +21,12 @@ class BlockchainHelper {
             const valueAsString = value.toString();
             return ethers.formatEther(valueAsString);;
         } catch (error: any) {
-            console.error(`ConvertWeiToPol error >>`, error);
+            console.error(`convertWeiToPol error >>`, error);
             return 0;
         }
     }
 
-    Fetch_Balance = async (
+    fetchBalance = async (
         address: string,
         coin: any
     ) => {
@@ -36,13 +36,13 @@ class BlockchainHelper {
                 switch (coin.token_type.toLowerCase()) {
 
                     case TokenStandard.ERC20:
-                        balance = await this.ERC20_Token_Fetch_Balance(
+                        balance = await this.erc20TokenFetchBalance(
                             address, //// wallet_address
                             coin.token_address ? coin.token_address : null/// contract_address
                         )
                         break;
                     case TokenStandard.ERC721:
-                        balance = await this.ERC721_Token_Fetch_Balance(
+                        balance = await this.erc721TokenFetchBalance(
                             address, //// wallet_address
                             coin.token_address ? coin.token_address : null /// contract_address
                         )
@@ -52,15 +52,15 @@ class BlockchainHelper {
                         break;
                 }
             } else {
-                balance = await this.Coin_Fetch_Balance(address);
+                balance = await this.coinFetchBalance(address);
             }
             return balance;
         } catch (error: any) {
-            console.error(`Pol_Helper BSC_Fetch_Balance error >>`, error);
+            console.error(`polHelper fetchBalance error >>`, error);
             return null;
         }
     }
-    public ERC20_Token_Fetch_Balance = async (
+    public erc20TokenFetchBalance = async (
         wallet_address: string,
         contract_address: string | null
     ) => {
@@ -73,10 +73,10 @@ class BlockchainHelper {
                   );
                   const decimals = Number(await contract.decimals())
                   const balance = await contract.balanceOf(wallet_address);
-                  const tokenBalance = await Utility_Helper.bigNumberSafeMath(
+                  const tokenBalance = await utilityHelper.bigNumberSafeMath(
                       balance, '/', Math.pow(10, decimals)
                   );
-                  const tokBalance: string = await Utility_Helper.exponentialToDecimal(tokenBalance)
+                  const tokBalance: string = await utilityHelper.exponentialToDecimal(tokenBalance)
                   return Number(tokBalance);
             }
             return null;
@@ -86,7 +86,7 @@ class BlockchainHelper {
             // throw error;
         }
     }
-    private ERC721_Token_Fetch_Balance = async (
+    private erc721TokenFetchBalance = async (
         wallet_address: string,
         contract_address: string | null
     ) => {
@@ -107,17 +107,17 @@ class BlockchainHelper {
             // throw error;
         }
     }
-    public Coin_Fetch_Balance = async (
+    public coinFetchBalance = async (
         address: string
     ) => {
         try {
             const balance = await this.provider.getBalance(address);
-            const tokenBalance = await Utility_Helper.bigNumberSafeMath(
+            const tokenBalance = await utilityHelper.bigNumberSafeMath(
                 balance.toString(),
                 "/",
                 Math.pow(10, 18)
             );
-            const coinBalance: string = await Utility_Helper.exponentialToDecimal(tokenBalance)
+            const coinBalance: string = await utilityHelper.exponentialToDecimal(tokenBalance)
             return Number(coinBalance);
         } catch (error: any) {
             console.error(`POL_Helper Coin_Fetch_Balance error >>`, error);
@@ -129,4 +129,4 @@ class BlockchainHelper {
 
 
 }
-export let Blockchain_Helper = new BlockchainHelper();
+export let blockchainHelper = new BlockChainHelper();

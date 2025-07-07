@@ -1,10 +1,10 @@
 import BigNumber from "bignumber.js";
 
 import {
-    Db_Helper
-} from ".";
+    dbHelper
+} from "./db.helper";
 
-import { NotificationModel } from "../models";
+import { notificationModel } from "../models";
 import firebaseAdmin from 'firebase-admin';
 import { fcmServiceAccount } from "../constants/fcm.admin.key";
 import { Op } from "sequelize";
@@ -90,7 +90,7 @@ class UtilityHelper {
     public async SendNotification(data: any) {
         try {
             let toUserId: number = data.to_user_id ? data.to_user_id : 0;
-            let deviceTokens: any = await Db_Helper.GetDeviceTokens(toUserId, data.wallet_address, data.coin_family);
+            let deviceTokens: any = await dbHelper.getDeviceTokens(data.wallet_address, data.coin_family);
             let finalDeviceTokens: any = [];
 
             for await (let deviceToken of deviceTokens) {
@@ -133,7 +133,7 @@ class UtilityHelper {
             }
 
             /* save notification */
-            const checkOldNotif: any = await NotificationModel.count({
+            const checkOldNotif: any = await notificationModel.count({
                 where: {
                     wallet_address:{[Op.like]: data.wallet_address},
                     notification_type: data.notification_type,
@@ -141,7 +141,7 @@ class UtilityHelper {
                 },
             });
             if (checkOldNotif == 0) {
-                let notificationModel: any = {
+                let notificationData: any = {
                     message: data.message,
                     from_user_id: data.from_user_id ? data.from_user_id : 0,
                     amount: data.amount,
@@ -156,7 +156,7 @@ class UtilityHelper {
                     view_status: "0",
                     state: "0",
                 };
-                await NotificationModel.create(notificationModel);
+                await notificationModel.create(notificationData);
             }
             return true;
         } catch (error) {
@@ -169,4 +169,4 @@ class UtilityHelper {
 
 
 }
-export let Utility_Helper = new UtilityHelper();
+export let utilityHelper = new UtilityHelper();

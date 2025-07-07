@@ -1,18 +1,18 @@
 import { config } from "../config/config";
 import { Op } from "sequelize";
 import { BlockChainStatusEnum } from "../enum";
-import { CoinsModel, TrnxHistoryModel } from "../models";
+import { coinsModel, trnxHistoryModel } from "../models";
 import kafkaHelper from "../config/kafka.helper";
-import { pending_trnx } from "../interfaces/global_helper";
+import { pendingTrnx } from "../interfaces/globalHelper";
 
 class POLPendingWithdrawalProcess {
   public pol_pending_withdrawal_tx_topic = config.KAFKA_TRANSACTIONS.POL_PENDING_WITHDRAWAL_TX_TOPIC;
 
   public getTransactionFromDB = async () => {
-    let tx: any = await TrnxHistoryModel.findAll({
+    const tx: any = await trnxHistoryModel.findAll({
       attributes: ["tx_id", "coin_id"],
       include: [{
-        model: CoinsModel,
+        model: coinsModel,
         attributes: ['is_token', 'token_type', 'token_address'],
         as: "coin_data"
       }],
@@ -26,7 +26,7 @@ class POLPendingWithdrawalProcess {
 
     if (tx.length > 0) {
       await Promise.all(tx.map(async (el: any) => {
-        const trnx: pending_trnx = {
+        const trnx: pendingTrnx = {
           tx_id: el.tx_id,
           coin_id: el.coin_id,
           is_token: el.coin_data.is_token,
@@ -36,14 +36,9 @@ class POLPendingWithdrawalProcess {
         return this.addTxToQueue(trnx); // Directly return the promise
       }));
     }
-    // if (tx.length > 0) {
-    //   for await (const el of tx) {
-    //     await this.addTxToQueue(el);
-    //   }
-    // }
   };
 
-  public addTxToQueue = async (data: { tx_id: string; coin_id: number }) => {
+  public addTxToQueue = async (data: pendingTrnx) => {
     await kafkaHelper.produceMessage(this.pol_pending_withdrawal_tx_topic, data);
   };
 }

@@ -1,15 +1,15 @@
-import { Blockchain_Helper } from "../helpers/index";
+import { blockchainHelper } from "../helpers/index";
 import { config } from "../config/config";
 import polProcessHelper from "./process.helper";
 import { KEYS } from "../enum";
-import { blocks_trnx } from "../interfaces/global_helper";
-import { PolOldBLockModel } from "../models";
-import { global_helper } from "../helpers/global_helper";
+import { blocksTrnx } from "../interfaces/globalHelper";
+import { polOldBLockModel } from "../models";
+import { globalHelper } from "../helpers/global.helper";
 import kafkaHelper from "../config/kafka.helper";
 import { ethers } from "ethers";
 
 
-class Pol_block_process {
+class PolBlockProcess {
     public minBlockConfirmation: number;
     public swap: string | null;
     public approval: string | null;
@@ -22,10 +22,16 @@ class Pol_block_process {
         this.approval = ethers.id('Approval(address,address,uint256)');
     }
 
-    public async getBlocks() {
+    public async readCurrentBlocks() {
         try {
-            let old_block: any = await polProcessHelper.getKeyValuePair(config.REDISKEYS.POL_BLOCKS, config.REDISKEYS.OLD_BLOCK_POL)
-            let new_block: any = await polProcessHelper.getKeyValuePair(config.REDISKEYS.POL_BLOCKS, config.REDISKEYS.NEW_BLOCK_POL)
+            const results = await polProcessHelper.getMultipleKeyValuePairs(config.REDISKEYS.POL_BLOCKS, [config.REDISKEYS.OLD_BLOCK_POL, config.REDISKEYS.NEW_BLOCK_POL]);
+
+            // Validate results array
+            if (!Array.isArray(results) || results.length < 2) {
+                console.error("Invalid results from Redis operation:", results);
+                return;
+            }
+            const [old_block, new_block] = results;
             if (!old_block) {
                 console.log("No block present in old block")
                 await polProcessHelper.setBlocks(config.REDISKEYS.POL_BLOCKS, config.REDISKEYS.OLD_BLOCK_POL, this.minBlockConfirmation, null)
@@ -35,12 +41,13 @@ class Pol_block_process {
                 await polProcessHelper.setBlocks(config.REDISKEYS.POL_BLOCKS, config.REDISKEYS.NEW_BLOCK_POL, this.minBlockConfirmation, null)
             }
             if (old_block && new_block) {
-                let oldBlock: number = Number(old_block);
-                let newBlock = Number(new_block);
+                const oldBlock: number = Number(old_block);
+                const newBlock = Number(new_block);
                 if (newBlock <= oldBlock) {
                     await polProcessHelper.setBlocks(config.REDISKEYS.POL_BLOCKS, config.REDISKEYS.NEW_BLOCK_POL, this.minBlockConfirmation, newBlock)
+                    return;
                 } else {
-                    let block_diff: number = newBlock - oldBlock;
+                    const block_diff: number = newBlock - oldBlock;
                     if (block_diff > 50) {
                         await polProcessHelper.diff_blocks_add_in_db(newBlock, oldBlock)
                         await polProcessHelper.setKeyValuePair(config.REDISKEYS.POL_BLOCKS, config.REDISKEYS.OLD_BLOCK_POL, newBlock.toString())
@@ -50,17 +57,17 @@ class Pol_block_process {
                     }
                 }
             } else {
-                console.log(" no old block and no new block")
-                await global_helper.save_error_logs('Pol_setBlocks', 'No old block no new block')
+                console.log("No old block and no new block")
+                await globalHelper.saveErrorLogs('Pol_getBlocks', 'No old block no new block')
             }
         } catch (err: any) {
             console.error("Error in getBlocks", err)
-            await global_helper.save_error_logs('Pol_getBlocks', err.message)
+            await globalHelper.saveErrorLogs('Pol_getBlocks', err.message)
         }
     }
     public async readBlocks(blockNumber: number, toBlockNumber: number) {
         try {
-            let block_updated: number = blockNumber + 1;
+            const block_updated: number = blockNumber + 1;
             await polProcessHelper.setKeyValuePair(config.REDISKEYS.POL_BLOCKS, config.REDISKEYS.OLD_BLOCK_POL, block_updated.toString());
             console.table({
                 LATEST_BLOCK: blockNumber,
@@ -70,15 +77,22 @@ class Pol_block_process {
             await this.getTxFromBlock(blockNumber, KEYS.latestBlock);
         } catch (err: any) {
             console.error("Error in readBlocks>>.", (err as Error).message)
-            await global_helper.save_error_logs('POL_readBlocks', err.message)
+            await globalHelper.saveErrorLogs('POL_readBlocks', err.message)
         }
     }
     public async getTxFromBlock(blockId: number, key: string) {
         try {
-            const blockInfo = await Blockchain_Helper.provider.getBlock(blockId, true);
+            console.error("In getTxFromBlock>>.", key, blockId)
+            const blockInfo = await blockchainHelper.provider.getBlock(blockId, true);
             if (!blockInfo) {
                 console.log("No block info");
-                await PolOldBLockModel.create({ block_number: blockId, coin_family: config.STATIC_COIN_FAMILY.POL, start_block: blockId, end_block: blockId, status: 0 })
+                await polOldBLockModel.create({
+                    block_number: blockId,
+                    coin_family: config.STATIC_COIN_FAMILY.POL,
+                    start_block: blockId,
+                    end_block: blockId,
+                    status: 0
+                });
                 return;
             }
             const transactions = blockInfo.prefetchedTransactions || [];
@@ -86,8 +100,9 @@ class Pol_block_process {
                 console.log("No block info transactions");
                 return;
             }
+
             const transactionPromises = transactions.map(async (tx) => {
-                const data: blocks_trnx = {
+                const data: blocksTrnx = {
                     block_number: blockId,
                     tx_id: tx.hash || '',
                     value: tx.value.toString(),
@@ -107,29 +122,28 @@ class Pol_block_process {
                     console.error("Error while producing message for transaction", tx.hash, err);
                 }
             });
+
+            // Wait for all the transaction processing to complete
             await Promise.allSettled(transactionPromises);
         } catch (err: any) {
             console.error("Error in getTxFromBlock:", (err as Error).message);
-            await global_helper.save_error_logs('Pol_readBehindBlock', err.message)
+            await globalHelper.saveErrorLogs('Pol_readBehindBlock', err.message)
         }
     }
     public async readBehindBlock() {
         try {
             // REDIS BASED
-            let data_exist: any = await polProcessHelper.getKeyValuePair(config.BLOCKS, config.READ_BEHINED_BLOCK_POL)
-
+            const data_exist: any = await polProcessHelper.getKeyValuePair(config.BLOCKS, config.READ_BEHINED_BLOCK_POL)
             if (data_exist) {
-                let data_exists = JSON.parse(data_exist)
+                const data_exists = JSON.parse(data_exist);
                 if (data_exists) {
                     console.log("This block exist in redis read behined")
                     let { id, start_block, end_block } = data_exists;
-
-
                     if (end_block > start_block) {
                         console.log("This block go for getTxFromBlock")
                         await this.getTxFromBlock(start_block, KEYS.behinedBlock);
                         start_block = start_block + 1;
-                        let add_data = {
+                        const add_data = {
                             id: id,
                             start_block: start_block,
                             end_block: end_block,
@@ -138,9 +152,10 @@ class Pol_block_process {
                         await polProcessHelper.setKeyValuePair(config.BLOCKS, config.READ_BEHINED_BLOCK_POL, JSON.stringify(add_data))
                     } else {
                         console.log("id>>>>>>>>>>>", id)
-                        await PolOldBLockModel.update({ status: 1 }, { where: { id: id } })
+                        await polOldBLockModel.update({ status: 1 }, { where: { id: id } })
                         await polProcessHelper.deleteKeyValuePair(config.BLOCKS, config.READ_BEHINED_BLOCK_POL)
-                        await polProcessHelper.behindBlocks();
+
+                        await polProcessHelper.behindBlocks()
                     }
                 }
             } else {
@@ -149,14 +164,14 @@ class Pol_block_process {
             }
         } catch (err: any) {
             console.error("Error in readBehindBlock>>", err)
-            await global_helper.save_error_logs('POL_readBehindBlock', err.message)
+            await globalHelper.saveErrorLogs('POL_readBehindBlock', err.message)
         }
     }
     public async readSpecificBlock() {
         try {
             console.log("Entere into readSpecificBlock>>>")
-            let specificBlocks: any = await polProcessHelper.getKeyValuePair(config.REDISKEYS.ALL_PROCESSES, config.REDISKEYS.SPECIFIC_BLOCK_POL)
-            let specific_block: any = JSON.parse(specificBlocks);
+            const specificBlocks: any = await polProcessHelper.getKeyValuePair(config.REDISKEYS.ALL_PROCESSES, config.REDISKEYS.SPECIFIC_BLOCK_POL)
+            const specific_block: any = JSON.parse(specificBlocks);
             if (specific_block && Number(specific_block) > 0) {
                 console.table({ SPECIFIC_BLOCK: specific_block })
                 await this.getTxFromBlock(specific_block, KEYS.readSpecificBlock)
@@ -169,41 +184,41 @@ class Pol_block_process {
             console.error("Error in readSpecificBlock>>>", error)
         }
     }
-    public async testingNode() {
-        try {
-            const provider = Blockchain_Helper.provider;
+    // public async testingNode() {
+    //     try {
+    //         const provider = blockchainHelper.provider;
 
-            // Get Block Number
-            const latestBlock = await provider.getBlockNumber();
-            console.log("Block number>>", latestBlock);
+    //         // Get Block Number
+    //         const latestBlock = await provider.getBlockNumber();
+    //         console.log("Block number>>", latestBlock);
 
-            const blockInfo = await provider.getBlock(latestBlock, true);
-            console.log("blockInfo>>", blockInfo);
+    //         const blockInfo = await provider.getBlock(latestBlock, true);
+    //         console.log("blockInfo>>", blockInfo);
 
-            if (blockInfo && blockInfo.transactions.length > 0) {
-                let firstTxHash: string;
-                const firstTx = blockInfo.transactions[0];
+    //         if (blockInfo && blockInfo.transactions.length > 0) {
+    //             let firstTxHash: string;
+    //             const firstTx = blockInfo.transactions[0];
 
-                if (typeof firstTx === 'string') {
-                    firstTxHash = firstTx;
-                } else {
-                    // Assert the type to access the hash property safely
-                    firstTxHash = (firstTx as ethers.TransactionResponse).hash;
-                }
-                // Get Block Receipt
-                const txReceipt = await provider.getTransactionReceipt(firstTxHash);
-                console.log("txreceipt>>", txReceipt);
+    //             if (typeof firstTx === 'string') {
+    //                 firstTxHash = firstTx;
+    //             } else {
+    //                 // Assert the type to access the hash property safely
+    //                 firstTxHash = (firstTx as ethers.TransactionResponse).hash;
+    //             }
+    //             // Get Block Receipt
+    //             const txReceipt = await provider.getTransactionReceipt(firstTxHash);
+    //             console.log("txreceipt>>", txReceipt);
 
-                // Get more details (not reduced in ethers.js)
-                const transaction = await provider.getTransaction(firstTxHash);
-                console.log("transaction>>", transaction);
-            } else {
-                console.log("No transactions found in the block");
-            }
-        } catch (err: any) {
-            console.error("Error in testingNode>>", err)
-        }
-    }
+    //             // Get more details (not reduced in ethers.js)
+    //             const transaction = await provider.getTransaction(firstTxHash);
+    //             console.log("transaction>>", transaction);
+    //         } else {
+    //             console.log("No transactions found in the block");
+    //         }
+    //     } catch (err: any) {
+    //         console.error("Error in testingNode>>", err)
+    //     }
+    // }
 }
 
-export const pol_blocks_process = new Pol_block_process();
+export const polBlocksProcess = new PolBlockProcess();
