@@ -31,7 +31,7 @@ class BlockchainHelper {
         coin: any
     ) => {
         try {
-            let balance: number = 0;
+            let balance: number | null = null;
             if (coin.is_token == BooleanEnum.true) {
                 switch (coin.token_type.toLowerCase()) {
 
@@ -54,7 +54,7 @@ class BlockchainHelper {
             } else {
                 balance = await this.Coin_Fetch_Balance(address);
             }
-            return balance
+            return balance;
         } catch (error: any) {
             console.error(`Pol_Helper BSC_Fetch_Balance error >>`, error);
             return null;
@@ -79,10 +79,11 @@ class BlockchainHelper {
                   const tokBalance: string = await Utility_Helper.exponentialToDecimal(tokenBalance)
                   return Number(tokBalance);
             }
-            return 0;
+            return null;
         } catch (error) {
             console.error(`Pol_Helper ERC20_Token_Fetch_Balance error >>`, error);
-            throw error;
+            return null;
+            // throw error;
         }
     }
     private ERC721_Token_Fetch_Balance = async (
@@ -99,10 +100,11 @@ class BlockchainHelper {
                 const balance = await contract.balanceOf(wallet_address);
                 return Number(balance.toString());
             }
-            return 0;
+            return null;
         } catch (error) {
             console.error(`Pol_Helper ERC20_Token_Fetch_Balance error >>`, error);
-            throw error;
+            return null;
+            // throw error;
         }
     }
     public Coin_Fetch_Balance = async (
@@ -116,10 +118,11 @@ class BlockchainHelper {
                 Math.pow(10, 18)
             );
             const coinBalance: string = await Utility_Helper.exponentialToDecimal(tokenBalance)
-            return Number(coinBalance || 0);
+            return Number(coinBalance);
         } catch (error: any) {
             console.error(`POL_Helper Coin_Fetch_Balance error >>`, error);
-            throw error;
+            return null;
+            // throw error;
         }
     }
 
