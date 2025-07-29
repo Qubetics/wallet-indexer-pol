@@ -142,23 +142,23 @@ class PolTxStatusUpdateProcess {
   ) {
     const txnData: any = await TrnxHistoryModel.findOne({ attributes: ['from_adrs', 'amount', 'user_id', 'id', 'to_adrs', 'type', 'coin_family', 'fiat_type'], where: { tx_id: trx_data.txid, status: 'completed', [Op.or]: [{ blockchain_status: { [Op.is]: null as any } }, { blockchain_status: 'pending' }] }, raw: true });
     if (txnData) {
-      let from_address = txnData.from_adrs;
-      let amount = txnData.amount;
-      let user_id = txnData.user_id;
-      let tx_row_id = txnData.id;
-      let status_tx = trx_data.status == "success" ? BlockChainStatusEnum.CONFIRMED : BlockChainStatusEnum.FAILED;
-      let to_address = txnData.to_adrs;
-      let tx_type = txnData?.type
-      let coin_symbol = trx_data?.coin?.coin_symbol
-      let coin_family = txnData.coin_family;
+      const from_address = txnData.from_adrs;
+      const amount = txnData.amount;
+      const user_id = txnData.user_id;
+      const tx_row_id = txnData.id;
+      const status_tx = trx_data.status == "success" ? BlockChainStatusEnum.CONFIRMED : BlockChainStatusEnum.FAILED;
+      const to_address = txnData.to_adrs;
+      const tx_type = txnData?.type
+      const coin_symbol = trx_data?.coin?.coin_symbol
+      const coin_family = txnData.coin_family;
 
       //Update transaction status
-      let txUpdateRes = await TrnxHistoryModel.update({ blockchain_status: status_tx, tx_fee: trx_data.tx_fee, gas_reverted: trx_data.gas_reverted }, { where: { id: tx_row_id } })
+      const txUpdateRes = await TrnxHistoryModel.update({ blockchain_status: status_tx, tx_fee: trx_data.tx_fee, gas_reverted: trx_data.gas_reverted }, { where: { id: tx_row_id } })
       if (txUpdateRes) {
         if (status_tx == BlockChainStatusEnum.CONFIRMED) {
           /** save rewrad */
 
-          let AddressWithdraw: any = await polProcessHelper.check_our_wallet_address(from_address);
+          const AddressWithdraw: any = await polProcessHelper.check_our_wallet_address(from_address);
           if (AddressWithdraw) {
             /** update withdraw user pol balance */
             if (tx_type !== TrnxTypeEnum.DAPP) {
@@ -184,7 +184,7 @@ class PolTxStatusUpdateProcess {
                 trnxTypeW = "Swap";
                 break;
               case TrnxTypeEnum.CROSS_CHAIN:
-                trnxTypeW = "Cross chain Swap";
+                trnxTypeW = "Cross Chain Swap";
                 break;
               default:
                 break;
@@ -193,7 +193,7 @@ class PolTxStatusUpdateProcess {
               amount
             )} ${coin_symbol.toUpperCase()} has been confirmed.`;
 
-            let notifData: NotificationInterface = {
+            const notifData: NotificationInterface = {
               title: trnxTypeW.toUpperCase(),
               message: notiMsg,
               amount: amount,
@@ -210,10 +210,10 @@ class PolTxStatusUpdateProcess {
             };
             Utility_Helper.SendNotification(notifData);
           }
-          let Addressdeposit: any = await polProcessHelper.check_our_wallet_address(to_address);
+          const Addressdeposit: any = await polProcessHelper.check_our_wallet_address(to_address);
           if (Addressdeposit) {
-            let to_user_id: number = Addressdeposit ? Addressdeposit.user_id : 0;
-            let trnxTypeD: string = "Deposit";
+            const to_user_id: number = Addressdeposit ? Addressdeposit.user_id : 0;
+            const trnxTypeD: string = "Deposit";
 
             /** update to adrs wallet balance */
             if (to_address !== from_address) {
