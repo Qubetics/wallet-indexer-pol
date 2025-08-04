@@ -15,8 +15,8 @@ class POLStartProcess {
     this.polWithdrawDepositProcess();
     this.getPendingWithdrawalTxProcess();
     this.updateTxStatusProcess();
-    this.polUpdateBalance();
-    this.polUpdateBalanceByWallet();
+    this.balanceUpdateConsumer();
+    this.balanceUpdateByWallet();
 
     // this.testing_node()
   }
@@ -57,15 +57,15 @@ class POLStartProcess {
       await polTxStatusUpdateProcess.startTxStatusUpdateQueue();
     }, 10000);
   }
-  public async polUpdateBalance() {
+  public async balanceUpdateConsumer() {
     setTimeout(async () => {
-      await pol_balance_update.default.update_wallet_balance();
+      await pol_balance_update.default.walletBalanceConsumer();
     }, 10000);
   }
 
-  public async polUpdateBalanceByWallet() {
+  public async balanceUpdateByWallet() {
     schedule.scheduleJob("*/2 * * * *", async function () {
-      await pol_balance_update.default.updateWalletBalanceByWallet();
+      await pol_balance_update.default.updateWalletBalance();
     });
   }
 }
