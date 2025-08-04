@@ -63,9 +63,9 @@ class UpdateBalanceController {
               },
             }
           );
-          console.log(`Balance updated for ${data.wallet_address}: ${balance}`);
+          // console.log(`Balance updated for ${data.wallet_address}: ${balance}`);
         } else {
-          console.log(`Balance unchanged for ${data.wallet_address}: ${balance}`);
+          // console.log(`Balance unchanged for ${data.wallet_address}: ${balance}`);
         }
       } else {
         if (data.queue_count <= 5) {
@@ -101,18 +101,18 @@ class UpdateBalanceController {
         config.config.REDISKEYS.ALL_PROCESSES,
         GLOBALBALANCEUPDATECOUNT
       );
-      console.log(
-        "🚀 ~ polUpdateBalanceController ~ publicupdateWalletBalanceByWal ~ findCoinCounter:",
-        findCoinCounter
-      );
+      // console.log(
+      //   "🚀 ~ polUpdateBalanceController ~ publicupdateWalletBalanceByWal ~ findCoinCounter:",
+      //   findCoinCounter
+      // );
 
       if (findCoinCounter) {
         coin_limit_count = Number(findCoinCounter);
       }
-      console.log(
-        "🚀 ~ polUpdateBalanceController ~ publicupdateWalletBalanceByWal ~ coin_limit_count:",
-        coin_limit_count
-      );
+      // console.log(
+      //   "🚀 ~ polUpdateBalanceController ~ publicupdateWalletBalanceByWal ~ coin_limit_count:",
+      //   coin_limit_count
+      // );
       const wallets: any = await WalletModel.findAll({
         attributes: ["wallet_address", "balance"],
         where: {
@@ -127,6 +127,7 @@ class UpdateBalanceController {
         ],
         limit,
         offset: coin_limit_count,
+        order: [['wallet_id', 'ASC']],
         nest: true,
         logging: true,
       });
@@ -155,7 +156,7 @@ class UpdateBalanceController {
         }
       }
       if (wallets.length < limit) {
-        console.log("inside wallets limit");
+        // console.log("inside wallets limit");
         await polProcessHelper.setKeyValuePair(
           config.config.REDISKEYS.ALL_PROCESSES,
           GLOBALBALANCEUPDATECOUNT,
@@ -163,14 +164,14 @@ class UpdateBalanceController {
         );
       } else {
         coin_limit_count += limit;
-        console.log("incrementing cnt");
+        // console.log("incrementing cnt");
         await polProcessHelper.setKeyValuePair(
           config.config.REDISKEYS.ALL_PROCESSES,
           GLOBALBALANCEUPDATECOUNT,
           coin_limit_count.toString()
         );
       }
-      console.log("\nEND");
+      // console.log("\nEND");
       return true;
     } catch (err) {
       console.error(
