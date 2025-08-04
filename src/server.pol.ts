@@ -1,20 +1,29 @@
-import { polWithdrawDepositProcess, polPendingWithdrawalProcess, polTxStatusUpdateProcess, pol_blocks_process, pol_tx_status_deposit_withdraw, pol_balance_update } from "./processes/index.process"
+import {
+  polWithdrawDepositProcess,
+  polPendingWithdrawalProcess,
+  polTxStatusUpdateProcess,
+  pol_blocks_process,
+  pol_tx_status_deposit_withdraw,
+  pol_balance_update,
+} from "./processes/index.process";
 import schedule from "node-schedule";
 class POLStartProcess {
   constructor() {
-    this.read_block_process()
-    this.readSpecificBlock()
-    this.consume_read_block_queue()
+    this.read_block_process();
+    this.readSpecificBlock();
+    this.consume_read_block_queue();
     this.polWithdrawDepositProcess();
     this.getPendingWithdrawalTxProcess();
     this.updateTxStatusProcess();
     this.polUpdateBalance();
+    this.polUpdateBalanceByWallet();
+
     // this.testing_node()
   }
   public read_block_process() {
     schedule.scheduleJob("*/2 * * * * *", async function () {
       await pol_blocks_process.getBlocks();
-      await pol_blocks_process.readBehindBlock()
+      await pol_blocks_process.readBehindBlock();
     });
   }
   // public testing_node() {
@@ -23,9 +32,9 @@ class POLStartProcess {
   //   });
   // }
   public readSpecificBlock() {
-    schedule.scheduleJob('*/1 * * * *', async function () {
+    schedule.scheduleJob("*/1 * * * *", async function () {
       await pol_blocks_process.readSpecificBlock();
-    })
+    });
   }
   public consume_read_block_queue() {
     setTimeout(async () => {
@@ -52,6 +61,12 @@ class POLStartProcess {
     setTimeout(async () => {
       await pol_balance_update.default.update_wallet_balance();
     }, 10000);
+  }
+
+  public async polUpdateBalanceByWallet() {
+    schedule.scheduleJob("*/2 * * * *", async function () {
+      await pol_balance_update.default.updateWalletBalanceByWallet();
+    });
   }
 }
 
