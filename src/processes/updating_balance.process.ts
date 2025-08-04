@@ -49,7 +49,7 @@ class UpdateBalanceController {
           data.coin_data
         );
         if (balance !== null) {
-          if (data?.balance && data.balance == balance) {
+          if (typeof data?.balance == "number" && data.balance == balance) {
             return;
           }
           await WalletModel.update(
@@ -136,6 +136,7 @@ class UpdateBalanceController {
           const payload = {
             coin_data: coin_data,
             wallet_address: wallet.wallet_address,
+            balance: wallet.balance,
             queue_count: 0,
           };
 
