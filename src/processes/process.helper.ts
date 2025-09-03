@@ -121,7 +121,7 @@ class PolProcessHelper {
         where: {
           coin_status: 1,
           coin_family: config.STATIC_COIN_FAMILY.POL,
-          [Op.or]: [{ token_type: { [Op.ne]: config.TOKEN_TYPE721_POL } }, { token_type: null }]
+          [Op.or]: [{ token_type: { [Op.ne]: "ERC721" } }, { token_type: null }]
         },
         raw: true
       });

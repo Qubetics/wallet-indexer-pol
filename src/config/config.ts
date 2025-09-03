@@ -13,7 +13,6 @@ export const config = {
   REDIS_CONN: zookeeperConfig.config.REDIS_CONN,
   MIN_BLOCK_CONFORMATIONS: zookeeperConfig.config.MIN_BLOCK_CONFORMATIONS,
   TOKEN_TYPE_POL: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.TOKEN_TYPE_POL}`,
-  TOKEN_TYPE721_POL: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.TOKEN_TYPE721_ETH}`,
   STATIC_COIN_FAMILY: zookeeperConfig.config.STATIC_COIN_FAMILY,
   REDISKEYS: {
     POL_BLOCKS: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.POL_BLOCKS} `,
