@@ -7,7 +7,7 @@ interface NotificationInstance
   extends Model<NotificationInterface, NotificationCreationModel>,
   NotificationInterface { }
 
-let dataObj = {
+const dataObj = {
   notification_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -72,7 +72,7 @@ let dataObj = {
   }
 };
 
-let dataObjIndex = {
+const dataObjIndex = {
   indexes: [
     {
       unique: false,

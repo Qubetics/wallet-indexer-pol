@@ -1,50 +1,30 @@
-import { BooleanEnum, TokenStandard } from "../enum";
-import { Utility_Helper } from "./utility.helper";
+import { TokenStandard } from "../enum";
+import { utilityHelper } from "./utility.helper";
 import { config } from '../config';
 import { ethers } from 'ethers';
+import { TokenData } from "../interfaces/ether.interface";
+import { coinData } from "../interfaces/global.interface";
 
 class BlockchainHelper {
     public provider: ethers.JsonRpcProvider;
-  
+
     constructor() {
-      this.provider = new ethers.JsonRpcProvider(config.config.NODE.POL_RPC_URL || "");
-      this.initialize();
-    }
-  
-  
-    public initialize() {}
-    //POL
-    convertWeiToPOL = async (
-        value: number | string
-    ) => {
-        try {
-            const valueAsString = value.toString();
-            return ethers.formatEther(valueAsString);;
-        } catch (error: any) {
-            console.error(`ConvertWeiToPol error >>`, error);
-            return 0;
-        }
+        this.provider = new ethers.JsonRpcProvider(config.config.NODE.POL_RPC_URL || "");
+        this.initialize();
     }
 
-    Fetch_Balance = async (
-        address: string,
-        coin: any
-    ) => {
+    public initialize() { }
+
+    //POL
+    public async fetchPolBalance(address: string, coin: coinData) {
         try {
             let balance: number | null = null;
-            if (coin.is_token == BooleanEnum.true) {
-                switch (coin.token_type.toLowerCase()) {
-
+            if (coin.is_token == true) {
+                switch (coin?.token_type?.toLowerCase()) {
                     case TokenStandard.ERC20:
-                        balance = await this.ERC20_Token_Fetch_Balance(
-                            address, //// wallet_address
-                            coin.token_address ? coin.token_address : null/// contract_address
-                        )
-                        break;
-                    case TokenStandard.ERC721:
-                        balance = await this.ERC721_Token_Fetch_Balance(
-                            address, //// wallet_address
-                            coin.token_address ? coin.token_address : null /// contract_address
+                        balance = await this.erc20TokenBalance(
+                            address,
+                            coin.token_address ? coin.token_address : null
                         )
                         break;
                     default:
@@ -52,81 +32,85 @@ class BlockchainHelper {
                         break;
                 }
             } else {
-                balance = await this.Coin_Fetch_Balance(address);
+                balance = await this.polCoinBalance(address);
             }
             return balance;
-        } catch (error: any) {
-            console.error(`Pol_Helper BSC_Fetch_Balance error >>`, error);
+        } catch (err: any) {
+            console.error(`fetcPolBalance error >>`, err);
             return null;
         }
     }
-    public ERC20_Token_Fetch_Balance = async (
-        wallet_address: string,
-        contract_address: string | null
-    ) => {
+
+    public async erc20TokenBalance(wallet_address: string, contract_address: string | null) {
         try {
             if (contract_address) {
                 const contract = new ethers.Contract(
                     contract_address,
                     config.config.CONTRACT_ABI,
                     this.provider
-                  );
-                  const decimals = Number(await contract.decimals())
-                  const balance = await contract.balanceOf(wallet_address);
-                  const tokenBalance = await Utility_Helper.bigNumberSafeMath(
-                      balance, '/', Math.pow(10, decimals)
-                  );
-                  const tokBalance: string = await Utility_Helper.exponentialToDecimal(tokenBalance)
-                  return Number(tokBalance);
-            }
-            return null;
-        } catch (error) {
-            console.error(`Pol_Helper ERC20_Token_Fetch_Balance error >>`, error);
-            return null;
-            // throw error;
-        }
-    }
-    private ERC721_Token_Fetch_Balance = async (
-        wallet_address: string,
-        contract_address: string | null
-    ) => {
-        try {
-            if (contract_address) {
-                const contract = new ethers.Contract(
-                contract_address,
-                config.config.ERC721ABI,
-                this.provider
                 );
+                const decimals = Number(await contract.decimals())
                 const balance = await contract.balanceOf(wallet_address);
-                return Number(balance.toString());
+                const tokenBalance = await utilityHelper.bigNumberSafeMath(
+                    balance, '/', Math.pow(10, decimals)
+                );
+                const tokBalance: string = await utilityHelper.exponentialToDecimal(tokenBalance)
+                return Number(tokBalance);
             }
             return null;
-        } catch (error) {
-            console.error(`Pol_Helper ERC20_Token_Fetch_Balance error >>`, error);
+        } catch (err: any) {
+            console.error(`erc20TokenBalance error >>`, err);
             return null;
-            // throw error;
+            // throw err;
         }
     }
-    public Coin_Fetch_Balance = async (
-        address: string
-    ) => {
+
+    public async polCoinBalance(address: string) {
         try {
             const balance = await this.provider.getBalance(address);
-            const tokenBalance = await Utility_Helper.bigNumberSafeMath(
-                balance.toString(),
-                "/",
-                Math.pow(10, 18)
+            const tokenBalance = await utilityHelper.bigNumberSafeMath(
+                balance, '/', Math.pow(10, 18)
             );
-            const coinBalance: string = await Utility_Helper.exponentialToDecimal(tokenBalance)
+            const coinBalance: string = await utilityHelper.exponentialToDecimal(tokenBalance)
             return Number(coinBalance);
-        } catch (error: any) {
-            console.error(`POL_Helper Coin_Fetch_Balance error >>`, error);
+        } catch (err: any) {
+            console.error(`polCoinBalance error >>`, err);
             return null;
-            // throw error;
+            // throw err;
         }
     }
 
+    public async convertWeiToPol(value: number | string) {
+        try {
+            const valueAsString = value.toString();
+            return ethers.formatEther(valueAsString);;
+        } catch (err: any) {
+            console.error(`ConvertWeiToPol error >>`, err);
+            return 0;
+        }
+    }
 
+    public async tokenDetails(tokenAddress: string) {
+        try {
+            const contract = new ethers.Contract(tokenAddress, config.config.CONTRACT_ABI, this.provider);
+            const [decimals, name, symbol] = await Promise.all([
+                contract.decimals(),
+                contract.name(),
+                contract.symbol()
+            ]);
+
+            const data: TokenData = {
+                decimals: Number(decimals),
+                name,
+                symbol
+            };
+
+            return data;
+        } catch (err: any) {
+            console.error("tokenDetails", err)
+            return null;
+        }
+    }
 
 }
-export let Blockchain_Helper = new BlockchainHelper();
+export let blockchainHelper = new BlockchainHelper();

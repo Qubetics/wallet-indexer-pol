@@ -8,27 +8,38 @@ export const config = {
   DB_PASSWORD: zookeeperConfig.config.DB_PASSWORD,
   DB_PORT: zookeeperConfig.config.DB_PORT,
   POL_WALLET_ADDRESS: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.POL_WALLET_ADDRESS}`,
-  REDIS_CONN: zookeeperConfig.config.REDIS_CONN,
   KAFKA_BROKER: zookeeperConfig.config.KAFKA_BROKER,
   KAFKA_CLIENT_ID: zookeeperConfig.config.KAFKA_CLIENT_ID,
+  REDIS_CONN: zookeeperConfig.config.REDIS_CONN,
   MIN_BLOCK_CONFORMATIONS: zookeeperConfig.config.MIN_BLOCK_CONFORMATIONS,
   TOKEN_TYPE_POL: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.TOKEN_TYPE_POL}`,
   TOKEN_TYPE721_POL: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.TOKEN_TYPE721_ETH}`,
   STATIC_COIN_FAMILY: zookeeperConfig.config.STATIC_COIN_FAMILY,
   REDISKEYS: {
     POL_BLOCKS: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.POL_BLOCKS} `,
-    OLD_BLOCK_POL: zookeeperConfig.config.OLD_BLOCK_POL,
-    NEW_BLOCK_POL: zookeeperConfig.config.NEW_BLOCK_POL,
+    // OLD_BLOCK_POL: zookeeperConfig.config.OLD_BLOCK_POL,
+    // NEW_BLOCK_POL: zookeeperConfig.config.NEW_BLOCK_POL,
+    START_BLOCK: 'start_block',
+    END_BLOCK: 'end_block',
     ALL_PROCESSES: zookeeperConfig.config.ALL_PROCESSES,
     POL_ERROR_LOGS: zookeeperConfig.config.POL_ERROR_LOGS,
     NODE_ALERT_POL: zookeeperConfig.config.NODE_ALERT_POL,
     SPECIFIC_BLOCK_POL: zookeeperConfig.config.SPECIFIC_BLOCK_POL
   },
 
+  MORALIS_TRADINGVIEW_TOPIC: zookeeperConfig.config.MORALIS_TRADING_VIEW_TOPIC,
+
+
+  // added till now
+  NODE: { POL_RPC_URL: zookeeperConfig.config.POL_RPC_URL },
   /**
    * KAFKA KEYS START
    */
   KAFKA_BLOCKS: {
+    POL_BLOCK_TOPIC: 'pol_block_topic',
+    POL_BLOCK_GROUP_ID: 'pol_block_group',
+    POL_BEHIND_BLOCK_TOPIC: 'pol_behind_block_topic',
+    POL_BEHIND_BLOCK_GROUP_ID: 'pol_behind_block_group',
     POL_BLOCK_TX_TOPIC: zookeeperConfig.config.POL_BLOCK_TX_TOPIC,
     POL_BEHIND_BLOCK_TX_TOPIC: zookeeperConfig.config.POL_BEHIND_BLOCK_TX_TOPIC,
     POL_BLOCK_TX_GROUP_ID: zookeeperConfig.config.POL_BLOCK_TX_GROUP_ID,
@@ -38,27 +49,26 @@ export const config = {
     DEPOSIT_WITHDRAW_GROUP_ID: zookeeperConfig.config.POL_DEPOSIT_WITHDRAW_GROUP_ID,
     DEPOSIT_WITHDRAW_TOPIC: zookeeperConfig.config.POL_DEPOSIT_WITHDRAW_TOPIC,
     POL_PENDING_WITHDRAWAL_TX_TOPIC: zookeeperConfig.config.POL_PENDING_WITHDRAWAL_TX_TOPIC,
-    POL_PENDING_WITHDRAWAL_TX_GROUP_ID: zookeeperConfig.config.POL_PENDING_WITHDRAWAL_TX_GROUP_ID
+    POL_PENDING_WITHDRAWAL_TX_GROUP_ID: zookeeperConfig.config.POL_PENDING_WITHDRAWAL_TX_GROUP_ID,
+    TRACE_BLOCK_POL_DEPOSIT_TOPIC: "trace_block_pol_deposit_topic",
+    TRACE_BLOCK_POL_DEPOSIT_GROUP_ID: "trace_block_pol_deposit_group_id"
   },
   KAFKA_BALANCE: {
     POL_PENDING_BALANCE_UPDATE_TOPIC: zookeeperConfig.config.POL_PENDING_BALANCE_UPDATE_TOPIC,
     POL_PENDING_BALANCE_UPDATE_GROUP_ID: zookeeperConfig.config.POL_PENDING_BALANCE_UPDATE_GROUP_ID
   },
-  /**
-   * KAFKA KEYS END
-   */
+
   MAILGUN: {
     MAILGUN_API_KEY: zookeeperConfig.config.MAILGUN_API_KEY,
     MAILGUN_DOMAIN: zookeeperConfig.config.MAILGUN_DOMAIN,
     MAILGUN_BASE_URL: zookeeperConfig.config.MAILGUN_BASE_URL,
     FROM_GMAIL: zookeeperConfig.config.FROM_GMAIL
-  },
-  NODE: {
-    POL_RPC_URL: zookeeperConfig.config.POL_RPC_URL
+
   },
   NODE_ISSUE_ALERT_EMAIL: zookeeperConfig.config.NODE_ISSUE_ALERT_EMAIL,
   READ_BEHINED_BLOCK_POL: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.READ_BEHINED_BLOCK_POL}`,
   BLOCKS: zookeeperConfig.config.BLOCKS,
+
   CONTRACT_ABI: [
     {
       constant: true,
@@ -307,6 +317,7 @@ export const config = {
       type: "event",
     },
   ],
+
   ERC721ABI: [
     {
       anonymous: false,

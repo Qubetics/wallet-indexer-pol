@@ -7,7 +7,7 @@ interface PolOldBlockInstance
     extends Model<PolOldBlockInterface, PolOldBlockCreationModel>,
     PolOldBlockInterface { }
 
-let dataObj = {
+const dataObj = {
     id: {
         primaryKey: true,
         type: DataTypes.INTEGER,
@@ -20,11 +20,11 @@ let dataObj = {
     },
     start_block: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
     },
     end_block: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
     },
     coin_family: {
         type: DataTypes.INTEGER,
@@ -32,7 +32,7 @@ let dataObj = {
     },
     status: {
         type: DataTypes.TINYINT,
-        allowNull: true,
+        allowNull: true
     }
 };
 let dataObjIndex = {
@@ -47,6 +47,6 @@ let dataObjIndex = {
 }
 
 
-const PolOldBLockModel = db.db_write.define<PolOldBlockInstance>("pol_old_blocks", dataObj, dataObjIndex);
+const polOldBLockModel = db.db_write.define<PolOldBlockInstance>("pol_old_blocks", dataObj, dataObjIndex);
 
-export default PolOldBLockModel;
+export default polOldBLockModel;

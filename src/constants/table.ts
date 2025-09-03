@@ -1,7 +1,7 @@
-export enum TrnxHistory {
-    TRNX_HISTORY = "trnx_histories"
-}
+// export enum TrnxHistory {
+//     TRNX_HISTORY = "trnx_histories"
+// }
 
-export enum WALLETS {
-    WALLETS = "wallets"
-}
+// export enum WALLETS {
+//     WALLETS = "wallets"
+// }

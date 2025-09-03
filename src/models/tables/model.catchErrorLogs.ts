@@ -6,7 +6,7 @@ interface CatchErrorMsgsInstance
     extends Model<CatchErrorMsgsInterface, CatchErrorMsgsCreationModel>,
     CatchErrorMsgsInterface { }
 
-let dataObj = {
+const dataObj = {
     id: {
         type: DataTypes.INTEGER,
         allowNull: false,

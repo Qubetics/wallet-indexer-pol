@@ -4,7 +4,7 @@ import db from "../../config/db";
 interface CoinCreationModel extends Optional<CoinInterface, "coin_id"> { }
 interface CoinInstance extends Model<CoinInterface, CoinCreationModel>, CoinInterface { }
 
-let dataObj = {
+const dataObj = {
     coin_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -76,7 +76,7 @@ let dataObj = {
         allowNull: true,
     },
 };
-let dataObjIndex = {
+const dataObjIndex = {
     indexes: [
         {
             unique: true,

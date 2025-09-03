@@ -1,13 +1,14 @@
 import database from "../config/db";
-import Sequelize, { QueryTypes } from "sequelize";
+import { QueryTypes } from "sequelize";
 import { CoinInterface, CoinsModel, PolOldBLockModel, WalletInterface } from "../models";
 import redisClient from "../config/redis";
 import { promisify } from "util";
 import { config } from "../config/config";
-import { BooleanEnum, CoinFamilyEnum } from "../enum";
-import { global_helper } from "../helpers/global_helper";
-import { Blockchain_Helper } from "../helpers";
+import { TokenStandard } from "../enum";
+import { globalHelper } from "../helpers/global.helper";
+import { blockchainHelper, dbHelper } from "../helpers";
 import { Op } from "sequelize";
+import kafkaHelper from "../config/kafka.helper";
 
 class PolProcessHelper {
   public CoinsInterface: CoinInterface[];
@@ -17,7 +18,8 @@ class PolProcessHelper {
     this.fetchERC20Tokens();
     this.fetchWalletAddress();
   }
-  public async getKeyValuePair(keyName: string, field: string) {
+
+  public getKeyValuePair = async (keyName: string, field: string) => {
     try {
       const getAsync = promisify(redisClient.HGET).bind(redisClient);
       const value = await getAsync(keyName, field.toUpperCase() || "");
@@ -27,62 +29,67 @@ class PolProcessHelper {
       return null;
     }
   }
-  public async setBlocks(field: string, key: string, minBlockConfirmation: number, newBlock: number | null) {
+
+  public async getMultipleKeyValuePairs(keyName: string, fields: string[]) {
     try {
-      let latestBlock = await Blockchain_Helper.provider.getBlockNumber();
+      const upperFields = fields.map(f => f.toUpperCase());
+      return new Promise((resolve, reject) => {
+        redisClient.hmget(keyName, ...upperFields, (err, results) => {
+          if (err) reject(err);
+          else resolve(results);
+        });
+      });
+    } catch (err: any) {
+      console.error('getMultipleKeyValuePairs >>>>', err);
+      return null;
+    }
+  }
+
+  public setBlocks = async (field: string, key: string, minBlockConfirmation: number, newBlock: number | null) => {
+    try {
+      let latestBlock = await blockchainHelper.provider.getBlockNumber();
+      console.log('latestBlock <<<', latestBlock);
+      console.log('minBlockConfirmation <<<', minBlockConfirmation);
+      console.log('key <<<', key);
       latestBlock = latestBlock - minBlockConfirmation;
       if (newBlock) {
         if (newBlock < latestBlock) {
-          await polProcessHelper.setKeyValuePair(field, key, latestBlock.toString())
+          await this.setKeyValuePair(field, key, latestBlock.toString())
         } else {
           console.log("No updation of blocks")
         }
       } else {
-        await polProcessHelper.setKeyValuePair(field, key, latestBlock.toString())
+        await this.setKeyValuePair(field, key, latestBlock.toString())
       }
     } catch (err: any) {
       console.error("Error in  getBlocks", err)
-      await global_helper.save_error_logs('POL_setBlocks', err.message)
+      await dbHelper.saveErrorLogs('Pol_setBlocks', err.message)
     }
   }
-  public async setKeyValuePair(keyName: string, field: string, value: string) {
+
+  public setKeyValuePair = async (keyName: string, field: string, value: string) => {
     try {
       redisClient.hset(keyName, field.toUpperCase(), value);
     } catch (err: any) {
       console.error('setKeyValuePair >>>', err);
     }
   }
-  public async diff_blocks_add_in_db(current_block: number, old_block: number) {
+
+  public async diffBlocksAddInDb(current_block: number, old_block: number) {
     try {
-      let value_exist: any = await this.getKeyValuePair(config.REDISKEYS.ALL_PROCESSES, config.REDISKEYS.NODE_ALERT_POL)
-      if (value_exist) {
-        let setvalue: number = Number(value_exist) + 1;
-        if (Number(value_exist) <= 100) {
-          await this.setKeyValuePair(config.REDISKEYS.ALL_PROCESSES, config.REDISKEYS.NODE_ALERT_POL, setvalue.toString())
-          if (Number(value_exist) == 0 || Number(value_exist) == 5 || Number(value_exist) == 10 || Number(value_exist) == 20 || Number(value_exist) == 50 || Number(value_exist) == 75 || Number(value_exist) == 100) {
-            let email_body = `<p>Polygon Node Issue ${Number(value_exist)}</p><p>Current block running = ${current_block}.</p><p>Old Block = ${old_block}.</p>`;
-            await global_helper.send_mail(config.NODE_ISSUE_ALERT_EMAIL, email_body, `Polygon Node Issue ${Number(value_exist)}`);
-          } else {
-            console.log("no email")
-          }
-        } else {
-          console.log("Number(value_exist) > 100")
-        }
-      } else {
-        await this.setKeyValuePair(config.REDISKEYS.ALL_PROCESSES, config.REDISKEYS.NODE_ALERT_POL, '0')
-      }
-      let dataToInsert = { block_number: old_block, coin_family: config.STATIC_COIN_FAMILY.POL, start_block: old_block, end_block: current_block, status: 0 }
+
+      const dataToInsert = { block_number: old_block, coin_family: config.STATIC_COIN_FAMILY.POL, start_block: old_block, end_block: current_block, status: 0 }
       console.log("dataToInsert>>>>", dataToInsert)
       await PolOldBLockModel.create(dataToInsert)
       return true;
     } catch (err: any) {
       console.error("💥 ~ Error in diff_blocks_add_in_redis.", err)
-      await global_helper.save_error_logs('POL_diff_blocks_add_in_db', err.message)
+      await dbHelper.saveErrorLogs('diffBlocksAddInDb', err.message)
       return false;
     }
   }
 
-  public async getHashTable(keyName: string) {
+  public getHashTable = async (keyName: string) => {
     try {
       const getAsync: any = promisify(redisClient.hvals).bind(redisClient)
       const value: any = await getAsync(keyName)
@@ -92,7 +99,8 @@ class PolProcessHelper {
       return null;
     }
   }
-  public async deleteKeyValuePair(keyName: string, field: string) {
+
+  public deleteKeyValuePair = async (keyName: string, field: string) => {
     try {
       redisClient.hdel(keyName, field.toUpperCase(), function (err) {
         if (err) {
@@ -105,8 +113,6 @@ class PolProcessHelper {
       return false;
     }
   }
-
-
 
   public fetchERC20Tokens = async () => {
     try {
@@ -132,10 +138,10 @@ class PolProcessHelper {
           );
         }
       }
-      // redisClient.set(config.TOKEN_TYPE_POL || "", JSON.stringify(tokens));
+      // redisClient.set(config.TOKEN_TYPE_BSC || "", JSON.stringify(tokens));
     } catch (err: any) {
       console.error('fetchERC20Tokens >>>>>', err);
-      await global_helper.save_error_logs('POL_fetchERC20Tokens', err.message)
+      await dbHelper.saveErrorLogs('Pol_fetchERC20Tokens', err.message)
     }
   }
 
@@ -147,7 +153,7 @@ class PolProcessHelper {
         { type: QueryTypes.SELECT }
       );
       for await (let wallet of addresses) {
-        let findAddress = await this.getKeyValuePair(
+        const findAddress = await this.getKeyValuePair(
           `${config.POL_WALLET_ADDRESS}`,
           wallet.address.toUpperCase()
         );
@@ -160,9 +166,10 @@ class PolProcessHelper {
         }
       }
     } catch (error) {
-      console.error('💥 ~ fetchWalletAddress error', error);
+      console.error('💥 ~ fetchAllWalletAddress error', error);
     }
   };
+
 
   public checkIfContract = async (address: string) => {
     try {
@@ -172,7 +179,7 @@ class PolProcessHelper {
       // }
       return JSON.parse(token_data);
     } catch (err: any) {
-      console.error('check_our_wallet_address >>>>>', err);
+      console.error('checkIfContract >>>>>', err);
       return null;
     }
   };
@@ -180,7 +187,7 @@ class PolProcessHelper {
   // public checkIfContract = async (address: string) => {
   //   try {
   //     const getAsync = promisify(redisClient.get).bind(redisClient);
-  //     const value = await getAsync(config.TOKEN_TYPE_POL || "");
+  //     const value = await getAsync(config.TOKEN_TYPE_BSC || "");
 
   //     const erc20Tokens: CoinInterface[] = value ? JSON.parse(value) : [];
   //     const token = erc20Tokens.find(
@@ -211,7 +218,7 @@ class PolProcessHelper {
   // public checkIfOurNFTContract = async (address: string) => {
   //   try {
   //     const getAsync = promisify(redisClient.get).bind(redisClient);
-  //     const value = await getAsync(config.TOKEN_TYPE721_POL);
+  //     const value = await getAsync(config.TOKEN_TYPE721_BSC);
   //     const erc721Tokens: CoinInterface[] = value ? JSON.parse(value) : [];
   //     const token = erc721Tokens.find(
   //       (el: any) => Number(el.is_token) === Number(BooleanEnum.true) && el.token_address.toUpperCase() === address?.toUpperCase()
@@ -225,70 +232,66 @@ class PolProcessHelper {
   //   }
   // };
 
-  public check_our_wallet_address = async (address: string) => {
+  public checkOurWalletAddress = async (address: string) => {
     try {
-      let wallet_data: any = await this.getKeyValuePair(config.POL_WALLET_ADDRESS, address);
-      // if (wallet_data) {
-      //   console.log("wallet_Data>>>>>>>>", wallet_data)
+      const walletData: any = await this.getKeyValuePair(config.POL_WALLET_ADDRESS, address);
+      // if (walletData) {
+      //   console.log("walletData>>>>>>>>", walletData)
       // }
-      return JSON.parse(wallet_data);
-    } catch (error: any) {
-      console.error('check_our_wallet_address >>>>>', error);
+      return walletData ? JSON.parse(walletData) : null;
+    } catch (err: any) {
+      console.error('checkOurWalletAddress >>>>>', err);
       return null;
     }
   };
-  // public NativeCoinByCoinFamily = async (
-  //   coin_family: CoinFamilyEnum
-  // ) => {
+
+  // public NativeCoinByCoinFamily = async (coin_family: CoinFamilyEnum) => {
   //   try {
   //     const getAsync = promisify(redisClient.get).bind(redisClient);
-  //     const value = await getAsync(config.TOKEN_TYPE_POL || "");
-
+  //     const value = await getAsync(config.TOKEN_TYPE_BSC || "");
   //     const erc20Tokens: CoinInterface[] = value ? JSON.parse(value) : [];
   //     return erc20Tokens.find(
   //       (el: CoinInterface) => Number(el.is_token) === Number(BooleanEnum.false) && el.coin_family === coin_family
   //     );
 
-  //   } catch (error: any) {
-  //     console.error(`NativeCoinByCoinFamily >>>`, error);
+  //   } catch (err: any) {
+  //     console.error(`NativeCoinByCoinFamily >>>`, err);
   //     return 0;
   //   }
   // }
 
-  // public CoinByCoinId = async (
-  //   coin_id: number
-  // ) => {
+  // public CoinByCoinId = async (coin_id: number) => {
   //   try {
   //     const getAsync = promisify(redisClient.get).bind(redisClient);
-  //     const value = await getAsync(config.TOKEN_TYPE_POL || "");
+  //     const value = await getAsync(config.TOKEN_TYPE_BSC || "");
 
   //     const erc20Tokens: CoinInterface[] = value ? JSON.parse(value) : [];
   //     return erc20Tokens.find(
   //       (el: CoinInterface) => el.coin_id === coin_id
   //     );
 
-  //   } catch (error: any) {
-  //     console.error(`CoinByCoinId >>>`, error);
+  //   } catch (err: any) {
+  //     console.error(`CoinByCoinId >>>`, err);
   //     return null;
   //   }
   // }
 
   public behindBlocks = async () => {
     try {
-      let behindBlocks: any = await PolOldBLockModel.findOne({
+      const behindBlocks: any = await PolOldBLockModel.findOne({
         attributes: ['id', 'block_number', 'start_block', 'end_block'],
         where: { status: 0 },
         raw: true,
         order: [['id', 'ASC']]
       })
       if (behindBlocks) {
-        let add_data = {
+        const addData = {
           id: behindBlocks.id,
           start_block: behindBlocks.start_block,
           end_block: behindBlocks.end_block,
           diff: behindBlocks.end_block - behindBlocks.start_block
         }
-        await this.setKeyValuePair(config.BLOCKS, config.READ_BEHINED_BLOCK_POL, JSON.stringify(add_data))
+        await this.setKeyValuePair(config.BLOCKS, config.READ_BEHINED_BLOCK_POL, JSON.stringify(addData))
       } else {
         console.log("you have not any behind block yet")
       }
@@ -297,6 +300,146 @@ class PolProcessHelper {
       return null;
     }
   }
+
+  private async addCoinToTable(
+    tokenAddress: string,
+    symbol: string,
+    name: string,
+    coinFamily: number,
+    tokenType: string,
+    decimals: any,
+    currentUTCDate: any,
+    userId: number
+  ) {
+    try {
+
+      const coinData: any = {
+        coin_name: name,
+        coin_symbol: symbol.toUpperCase(),
+        coin_image: null,
+        cmc_id: 0,
+        coin_family: coinFamily,
+        coin_status: 1,
+        is_token: 1,
+        is_on_cmc: 1,
+        for_swap: 0,
+        added_by: "user",
+        token_type: tokenType.toUpperCase(),
+        decimals: Math.pow(10, parseInt(decimals)),
+        token_address: tokenAddress,
+        created_at: currentUTCDate,
+        updated_at: currentUTCDate,
+        graph_pair: null,
+        graph_source: null,
+        is_on_trading_view: 1,
+      };
+      const response: any = await dbHelper.coinCreate(coinData);
+      console.log("🚀 ~ processHelper ~ response:", response)
+
+      coinData.coin_id = response.coin_id;
+      const redisCoinData = {
+        coin_id: coinData.coin_id,
+        is_token: coinData.is_token,
+        token_address: coinData.token_address,
+        coin_family: coinData.coin_family,
+        decimals: coinData.decimals,
+        token_type: coinData.token_type,
+        coin_symbol: coinData.coin_symbol,
+        added_by: coinData.added_by,
+        for_swap: coinData.for_swap
+      }
+
+      //update  token in redis hash 
+      await globalHelper.updateTokenInRedisHash(redisCoinData);
+      //insert token in custom token table 
+      await dbHelper.customTokenCreate({
+        coin_id: coinData.coin_id,
+        user_id: userId,
+      });
+      return redisCoinData;
+    } catch (err: any) {
+      console.error("Error in add_coin_to_table>>", err);
+      await dbHelper.saveErrorLogs("add_coin_to_table", err.message);
+      return null;
+    }
+  }
+
+  public async insertTokenAddressInDB(tokenAddress: string, tokenDetail: any, nativeWalletData: any) {
+    try {
+      console.log("data in insertTokenAddressInDB", nativeWalletData)
+      const userId = nativeWalletData.user_id;
+      const coinFamily = config.STATIC_COIN_FAMILY.POL;
+      const tokenType = TokenStandard.ERC20;
+      const decimals = tokenDetail.decimals;
+      const symbol = tokenDetail.symbol;
+      const name = tokenDetail.name;
+      const currentUTCDate: string = new Date()
+        .toISOString()
+        .replace(/T/, " ")
+        .replace(/\..+/, "");
+
+      //check if token already exist in db
+      const coinDataExist: any = await CoinsModel.findOne({
+        attributes: [
+          "coin_id",
+          "coin_status",
+          "added_by",
+          "coin_family",
+          "token_address",
+          "is_token",
+          "token_type",
+          "decimals",
+          "coin_symbol",
+        ],
+        where: {
+          token_address: tokenAddress,
+          coin_family: coinFamily
+        },
+        raw: true
+      });
+
+      if (coinDataExist) {
+        return coinDataExist;
+      }
+
+
+      //if token not exist in db then add it to db
+      const coinData: any = await this.addCoinToTable(
+        tokenAddress,
+        symbol,
+        name,
+        coinFamily,
+        tokenType,
+        decimals,
+        currentUTCDate,
+        userId
+      );
+
+
+      if (
+        coinFamily == config.STATIC_COIN_FAMILY.POL
+      ) {
+        const redisTokenData: any = {
+          coin_family: coinFamily,
+          token_address: tokenAddress,
+        };
+
+        //Todo : Need  to confirm from barjinder sir  if we need to produce message to kafka or not 
+        await kafkaHelper.produceMessage(
+          config.MORALIS_TRADINGVIEW_TOPIC,
+          redisTokenData
+        );
+      }
+
+      return coinData;
+
+    } catch (error) {
+      console.error(`insertTokenAddressInDB >>>`, error);
+      return null;
+    }
+
+  }
+
 }
 const polProcessHelper = new PolProcessHelper();
 export default polProcessHelper;

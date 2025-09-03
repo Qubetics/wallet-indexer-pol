@@ -5,9 +5,9 @@ export interface WalletInterface {
   wallet_address: string;
   coin_id: number;
   balance: number | string;
-  default_wallet?: number | 0;
+  // default_wallet?: number | 0;
   status?: number | 0;
   sort_order?: number | null;
-  is_private_wallet?: number | 0;
+  // is_private_wallet?: number | 0;
   coin_family?: number;
 }

@@ -7,21 +7,27 @@ class KafkaHelper {
 
     private producer: any;
 
-    constructor() {
-        this.connect();
-    }
+    // constructor() {
+    //     this.connect();
+    // }
 
-    async connect() {
-        const KAFKA_BROKER = config.config.KAFKA_BROKER.split(',');
-        console.log('KAFKA_BROKER', KAFKA_BROKER);
-        const kafkaCrednetials: Interface.KafkaCrednetials = {
-            clientId: String(config.config.KAFKA_CLIENT_ID), // 'test'
-            brokers: KAFKA_BROKER, // ['localhost:9092']
-        };
-        this.kafka = new Kafka(kafkaCrednetials);
-        this.producer = await this.kafka.producer();
-        await this.producer.connect();
-        console.log('producer connetced');
+    public async connect() {
+        try {
+            const KAFKA_BROKER = config.config.KAFKA_BROKER.split(',');
+            console.log('KAFKA_BROKER:', KAFKA_BROKER);
+
+            const kafkaCredentials: Interface.KafkaCrednetials = {
+                clientId: String(config.config.KAFKA_CLIENT_ID),
+                brokers: KAFKA_BROKER,
+            };
+
+            this.kafka = new Kafka(kafkaCredentials);
+            this.producer = this.kafka.producer();
+            await this.producer.connect();
+            console.log('✅ Kafka producer connected');
+        } catch (error) {
+            console.error('❌ Error connecting Kafka producer:', error);
+        }
     }
 
     public async produceMessage(topic: string, messageData: any) {

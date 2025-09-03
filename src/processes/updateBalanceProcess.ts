@@ -1,44 +1,87 @@
 import { config } from "../config";
 import kafkaHelper from "../config/kafka.helper";
 import { CoinFamilyEnum } from "../enum";
-import { Wallet_Helper } from "../helpers";
+import { walletHelper } from "../helpers";
 import { CoinsModel, WalletModel } from "../models";
 import polProcessHelper from "./process.helper";
 
-class UpdateBalanceController {
+class UpdateBalanceProcess {
   public pol_pending_balance_update_topic =
     config.config.KAFKA_BALANCE.POL_PENDING_BALANCE_UPDATE_TOPIC;
 
-  public walletBalanceConsumer = async () => {
-    const consumer = await kafkaHelper.kafka.consumer({
-      groupId: config.config.KAFKA_BALANCE.POL_PENDING_BALANCE_UPDATE_GROUP_ID,
-    });
-    await consumer.subscribe({
-      topic: this.pol_pending_balance_update_topic,
-      fromBeginning: true,
-    });
-    await consumer
-      .run({
-        eachMessage: async ({
-          topic,
-          partition,
-          message,
-        }: {
-          topic: any;
-          partition: any;
-          message: any;
-        }) => {
-          // console.log("🚀 ~ startTxStatusUpdateQueue topic >>>>", topic);
-          // console.log(
-          //   "🚀 ~ startTxStatusUpdateQueue message.value >>>>",
-          //   message.value.toString()
-          // );
-          await this.updateBalance(JSON.parse(message.value.toString()));
-        },
-      })
-      .catch((err: Error) => {
-        console.log("🔥 ~ ~ startTxStatusUpdateQueue error", err);
-      });
+
+  public updateBalanceConsumer = async () => {
+    let consumer: any = null;
+    let isConnected = false;
+
+    const connectConsumer = async () => {
+      try {
+
+        if (consumer) {
+          await consumer.disconnect();
+        }
+
+        consumer = await kafkaHelper.kafka.consumer({
+          groupId: config.config.KAFKA_BALANCE.POL_PENDING_BALANCE_UPDATE_GROUP_ID,
+          // Add session timeout for better error handling
+          sessionTimeout: 30000,
+          // Add heartbeat interval
+          heartbeatInterval: 3000,
+        });
+
+        await consumer.subscribe({
+          topic: this.pol_pending_balance_update_topic,
+          fromBeginning: true, // ✅ Changed to false to prevent reprocessing
+        });
+
+        await consumer.run({
+          // ✅ Add proper autoCommit configuration
+          autoCommit: true,
+          autoCommitInterval: 5000,
+          autoCommitThreshold: 100,
+
+          eachMessage: async ({ topic, partition, message }: { topic: any; partition: any; message: any }) => {
+            try {
+              await this.updateBalance(JSON.parse(message.value.toString()));
+
+            } catch (error) {
+              console.error(`❌ Error processing message:`, error);
+            }
+          },
+        });
+        isConnected = true;
+      } catch (error) {
+        console.error(`❌ Failed to connect consumer:`, error);
+        isConnected = false;
+        throw error;
+      }
+    };
+
+    // ✅ Add reconnection logic
+    const startWithReconnection = async () => {
+      while (true) {
+        try {
+          if (!isConnected) {
+            console.log(`🔄 Attempting to connect consumer updateBalanceConsumer...`);
+            await connectConsumer();
+          }
+
+          // Keep the consumer alive
+          await new Promise(resolve => setTimeout(resolve, 30000));
+
+        } catch (error) {
+          console.error(`❌ Consumer connection error:`, error);
+          isConnected = false;
+
+          // Wait before retrying
+          console.log(`⏳ Waiting 10 seconds before reconnecting...`);
+          await new Promise(resolve => setTimeout(resolve, 10000));
+        }
+      }
+    };
+
+    // Start the consumer with reconnection
+    await startWithReconnection();
   };
 
   public updateBalance = async (data: any) => {
@@ -47,7 +90,7 @@ class UpdateBalanceController {
         console.log(`Balance update attempts exceeded (5) for address: ${data.wallet_address}`);
         return;
       }
-      const balance = await Wallet_Helper.Update_Balance_Queue(
+      const balance: any = await walletHelper.updateBalanceQueue(
         data.wallet_address,
         data.coin_data
       );
@@ -63,12 +106,13 @@ class UpdateBalanceController {
               },
             }
           );
-          // console.log(`Balance updated for ${data.wallet_address}: ${balance}`);
+          //console.log(`Balance updated for ${data.wallet_address}: ${balance}`);
         } else {
-          // console.log(`Balance unchanged for ${data.wallet_address}: ${balance}`);
+          //console.log(`Balance unchanged for ${data.wallet_address}: ${balance}`);
         }
       } else {
         if (data.queue_count <= 5) {
+
           const queueData: any = {
             coin_data: data.coin_data,
             wallet_address: data.wallet_address,
@@ -83,7 +127,6 @@ class UpdateBalanceController {
           );
         }
       }
-
 
     } catch (err: any) {
       console.error("Error in updateBalance", err);
@@ -101,18 +144,12 @@ class UpdateBalanceController {
         config.config.REDISKEYS.ALL_PROCESSES,
         GLOBALBALANCEUPDATECOUNT
       );
-      // console.log(
-      //   "🚀 ~ polUpdateBalanceController ~ publicupdateWalletBalanceByWal ~ findCoinCounter:",
-      //   findCoinCounter
-      // );
+      //console.log("🚀 ~ polUpdateBalanceController ~ publicupdateWalletBalanceByWal ~ findCoinCounter:",findCoinCounter);
 
       if (findCoinCounter) {
         coin_limit_count = Number(findCoinCounter);
       }
-      // console.log(
-      //   "🚀 ~ polUpdateBalanceController ~ publicupdateWalletBalanceByWal ~ coin_limit_count:",
-      //   coin_limit_count
-      // );
+      // console.log("🚀 ~ polUpdateBalanceController ~ publicupdateWalletBalanceByWal ~ coin_limit_count:",coin_limit_count);
       const wallets: any = await WalletModel.findAll({
         attributes: ["wallet_address", "balance"],
         where: {
@@ -129,7 +166,7 @@ class UpdateBalanceController {
         offset: coin_limit_count,
         order: [['wallet_id', 'ASC']],
         nest: true,
-        logging: true,
+        // logging: true,
       });
       if (!wallets) {
         await polProcessHelper.setKeyValuePair(
@@ -173,13 +210,11 @@ class UpdateBalanceController {
       }
       // console.log("\nEND");
       return true;
-    } catch (err) {
-      console.error(
-        "Error in updateWalletBalanceByWallet",
-        (err as Error).message
-      );
+    } catch (err: any) {
+      console.error("Error in updateWalletBalanceByWallet", err);
     }
   };
 }
+export const updateBalanceProcess = new UpdateBalanceProcess();
 
-export default new UpdateBalanceController();
+// export default new UpdateBalanceController();

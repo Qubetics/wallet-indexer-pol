@@ -2,7 +2,8 @@ import {
   BlockChainStatusEnum,
   TrnxTypeEnum
 } from "../enum";
-import { CoinInterface } from "../models";
+// import { coinData } from "../interfaces/global.interface";
+// import { CoinInterface } from "../models";
 
 export type WalletAddresses = {
   wallet_address: string;
@@ -29,19 +30,28 @@ export type TxType = {
   blockId: number;
   isNFTToken?: boolean;
   txType: TrnxTypeEnum | null;
-  trnx_fee: number
+  trnxFee: number
 };
 
 export type WebHookTxType = {
-  tx_id: string;
-  from_address: string;
-  to_address: string;
+  txId: string;
+  fromAddress: string;
+  toAddress: string;
   amount: number;
-  block_id: number;
-  coin: CoinInterface;
+  blockId: number | string;
+  coin: {
+    coinId: number,
+    isToken: boolean,
+    tokenType: string | null,
+    coinSymbol: string,
+    coinFamily: number,
+    cmcId: number,
+    tokenAddress: string,
+    addedBy: string
+  };
   isNFTToken: boolean;
   status: string;
-  blockchain_status: BlockChainStatusEnum,
+  blockchainStatus: BlockChainStatusEnum,
   txType: TrnxTypeEnum | null;
-  trnx_fee: number
+  trnxFee: number
 };

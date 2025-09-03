@@ -7,7 +7,7 @@ interface DeviceTokenInstance
   extends Model<DeviceTokenInterface, DeviceTokenCreationModel>,
   DeviceTokenInterface { }
 
-let dataObj = {
+const dataObj = {
   id: {
     primaryKey: true,
     type: DataTypes.INTEGER,
@@ -26,6 +26,10 @@ let dataObj = {
     type: DataTypes.TEXT,
     allowNull: false,
   },
+  status: {
+    type: DataTypes.TINYINT,
+    allowNull: true,
+  },
   address: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -34,17 +38,13 @@ let dataObj = {
     type: DataTypes.TINYINT,
     allowNull: false,
   },
-  status: {
-    type: DataTypes.TINYINT,
-    allowNull: true,
-  },
   push: {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
 };
 
-let dataObjIndex = {
+const dataObjIndex = {
   indexes: [
     {
       unique: false,
@@ -65,6 +65,6 @@ let dataObjIndex = {
   ],
 };
 
-const DeviceTokenModel = db.db_write.define<DeviceTokenInstance>("deviceTokens", dataObj, dataObjIndex);
+const DeviceTokenModel = db.db_write.define<DeviceTokenInstance>("device_tokens", dataObj, dataObjIndex);
 
 export default DeviceTokenModel;
