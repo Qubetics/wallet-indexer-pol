@@ -13,10 +13,4 @@ export enum TokenStandard {
     ERC20 = 'ERC20',  // ethereum
     ERC721 = 'ERC721',  // ethereum
 
-    BEP20 = 'BEP20',  // binance
-    BEP721 = 'BEP721',  // binance
-
-    TRC20 = 'TRC20',
-    TRC10 = 'TRC10'
-
 }

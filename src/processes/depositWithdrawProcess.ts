@@ -152,7 +152,7 @@ class DepositWithdrawProcess {
         coin_symbol: trnxData.coin.coinSymbol,
         coin_family: trnxData.coin.coinFamily,
         cmc_id: trnxData.coin.cmcId,
-        token_address: trnxData.coin.isToken === true ? trnxData.coin.tokenAddress : trnxData.coin.coinSymbol,
+        token_address: Number(trnxData.coin.isToken) === Number(BooleanEnum.true) ? trnxData.coin.tokenAddress : trnxData.coin.coinSymbol,
         added_by: trnxData.coin.addedBy
       }
 
