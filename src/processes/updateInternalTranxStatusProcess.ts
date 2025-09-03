@@ -125,7 +125,7 @@ class UpdateInternalTrnxStatusProcess {
         }
 
         if (transactionReceipt?.status && transaction.blockHash != null) {
-          const txUpdate = {
+          const txUpdate: trnxStatusUpdate = {
             coin: {
               coinId: data.coinId,
               isToken: data.isToken,
