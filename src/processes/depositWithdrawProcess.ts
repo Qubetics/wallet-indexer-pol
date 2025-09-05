@@ -314,11 +314,11 @@ class DepositWithdrawProcess {
             coinData /// coin
           );
           if (coinData.is_token) {
-            const native_coin: any =
+            const nativeCoin: any =
               await polProcessHelper.checkIfContract('NativeCoin');
             await walletHelper.updateBalance(
               fromAddress, /// wallet_address,
-              native_coin /// coin
+              nativeCoin /// coin
             );
           }
 

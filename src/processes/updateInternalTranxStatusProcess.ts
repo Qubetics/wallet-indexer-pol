@@ -244,8 +244,8 @@ class UpdateInternalTrnxStatusProcess {
             if (addressWithdraw) {
               /** update withdraw user Pol balance */
               if (txType !== TrnxTypeEnum.DAPP) {
-                const native_coin: any = await polProcessHelper.checkIfContract('NativeCoin');
-                await walletHelper.updateBalance(fromAddress, native_coin);
+                const nativeCoin: any = await polProcessHelper.checkIfContract('NativeCoin');
+                await walletHelper.updateBalance(fromAddress, nativeCoin);
                 console.log("trx_data.coin?.token_type>>>>", trxData)
                 if (Number(trxData?.coin?.isToken) === Number(BooleanEnum.true) && trxData.coin?.tokenType?.toLowerCase() === TokenStandard.ERC20.toLowerCase()) {
                   /** Update User ERC20 Token Balance */
