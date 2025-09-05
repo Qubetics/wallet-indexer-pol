@@ -8,7 +8,7 @@ import { Op } from "sequelize";
 // import { globalHelper } from "../helpers/global.helper";
 import WalletModel from "../models/tables/model.wallets";
 import kafkaHelper from "../config/kafka.helper";
-import { coinData } from "../interfaces/global.interface";
+import { coinData, pushNotification } from "../interfaces/global.interface";
 
 
 class DepositWithdrawProcess {
@@ -271,7 +271,7 @@ class DepositWithdrawProcess {
             amount
           )} ${coinData?.coin_symbol?.toUpperCase()} has been confirmed.`;
 
-          const notifData: NotificationInterface = {
+          const notifData: pushNotification = {
             title: NotificationTypeEnum.DEPOSIT?.toUpperCase(),
             message: notiMsg,
             amount: amount,
@@ -327,7 +327,7 @@ class DepositWithdrawProcess {
             amount
           )} ${coinData.coin_symbol?.toUpperCase()} has been confirmed.`;
 
-          const notifData: NotificationInterface = {
+          const notifData: pushNotification = {
             title: trnxTypeW?.toUpperCase(),
             amount: amount,
             message: notiMsg,

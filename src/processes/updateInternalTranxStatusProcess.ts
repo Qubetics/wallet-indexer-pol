@@ -7,7 +7,7 @@ import { Op } from "sequelize";
 // import { globalHelper } from "../helpers/global.helper";
 import kafkaHelper from "../config/kafka.helper";
 import { ethers, TransactionReceipt, TransactionResponse } from "ethers";
-import { coinData, pendingTrnx, trnxStatusUpdate, updateBroadCastTrnx } from "../interfaces/global.interface";
+import { coinData, pendingTrnx, pushNotification, trnxStatusUpdate, updateBroadCastTrnx } from "../interfaces/global.interface";
 class UpdateInternalTrnxStatusProcess {
 
   public pol_pending_withdrawal_tx_topic = config.KAFKA_TRANSACTIONS.POL_PENDING_WITHDRAWAL_TX_TOPIC;
@@ -276,7 +276,7 @@ class UpdateInternalTrnxStatusProcess {
                 amount
               )} ${coinSymbol.toUpperCase()} has been confirmed.`;
 
-              const notifData: NotificationInterface = {
+              const notifData: pushNotification = {
                 title: trnxTypeW.toUpperCase(),
                 message: notiMsg,
                 amount: amount,
@@ -289,7 +289,7 @@ class UpdateInternalTrnxStatusProcess {
                 coin_family: trxData?.coin?.coinFamily,
                 tx_type: txType,
                 notification_type: trnxTypeW,
-                state: "confirmed"
+                // state: "confirmed"
               };
               utilityHelper.SendNotification(notifData);
             }
@@ -314,7 +314,7 @@ class UpdateInternalTrnxStatusProcess {
                 amount
               )} ${trxData?.coin?.coinSymbol.toUpperCase()} has been confirmed.`;
 
-              const notifData: NotificationInterface = {
+              const notifData: pushNotification = {
                 title: NotificationTypeEnum.DEPOSIT.toUpperCase(),
                 message: notiMsg,
                 amount: amount,
@@ -327,7 +327,7 @@ class UpdateInternalTrnxStatusProcess {
                 coin_family: trxData?.coin?.coinFamily,
                 tx_type: txType,
                 notification_type: trnxTypeD,
-                state: "confirmed"
+                // state: "confirmed"
               };
               utilityHelper.SendNotification(notifData);
             }
@@ -353,7 +353,7 @@ class UpdateInternalTrnxStatusProcess {
               break;
           }
           const notiMsg = trxData?.coin.tokenType === "ERC721" ? `Withdraw of NFT(${trxData?.coin.coinSymbol.toUpperCase()}) with token id ${amount} has been confirmed.` : `${trnxTypeW} of ${await utilityHelper.bigNumberSafeConversion(amount)} ${trxData?.coin.coinSymbol.toUpperCase()} has been failed.`;
-          const notifData: NotificationInterface = {
+          const notifData: pushNotification = {
             title: trnxTypeW.toUpperCase(),
             message: notiMsg,
             amount: amount,
@@ -366,7 +366,7 @@ class UpdateInternalTrnxStatusProcess {
             coin_family: trxData?.coin?.coinFamily,
             tx_type: txType,
             notification_type: trnxTypeW,
-            state: "failed"
+            // state: "failed"
           };
           utilityHelper.SendNotification(notifData);
 

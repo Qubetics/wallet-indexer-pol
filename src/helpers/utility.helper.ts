@@ -1,9 +1,10 @@
 import BigNumber from "bignumber.js";
 import { dbHelper } from ".";
-import { NotificationModel } from "../models";
+import { NotificationInterface, NotificationModel } from "../models";
 import firebaseAdmin from 'firebase-admin';
 import { Op } from "sequelize";
 import { fcmServiceAccount } from "../constants/firebase.admin.key";
+import { pushNotification } from "../interfaces/global.interface";
 
 class UtilityHelper {
   public messaging: firebaseAdmin.messaging.Messaging;
@@ -94,7 +95,7 @@ class UtilityHelper {
     return decimal;
   }
 
-  public async SendNotification(data: any) {
+  public async SendNotification(data: pushNotification) {
     try {
       const toUserId: number = data.to_user_id ? data.to_user_id : 0;
       const deviceTokens: any = await dbHelper.getDeviceTokens(toUserId, data.wallet_address, data.coin_family);
@@ -152,7 +153,7 @@ class UtilityHelper {
         },
       });
       if (checkOldNotif == 0) {
-        let notificationModel: any = {
+        const notificationModel: NotificationInterface = {
           message: data.message,
           from_user_id: data.from_user_id ? data.from_user_id : 0,
           amount: data.amount,
