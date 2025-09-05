@@ -20,6 +20,8 @@ class ReadBlockProcess {
     public processed_dividend_tracker: string | null;
     public dividend_withdrawn: string | null;
     public deposit: string | null;
+    public LogFeeTransfer: string | null;
+    public LogTransfer : string | null;
     public pol_block_tx_topic = config.KAFKA_BLOCKS.POL_BLOCK_TX_TOPIC;
     public pol_behind_block_tx_topic = config.KAFKA_BLOCKS.POL_BEHIND_BLOCK_TX_TOPIC;
     public deposit_withdraw_topic = config.KAFKA_TRANSACTIONS.DEPOSIT_WITHDRAW_TOPIC;
@@ -34,6 +36,8 @@ class ReadBlockProcess {
         this.processed_dividend_tracker = ethers.id('ProcessedDividendTracker(uint256,uint256,uint256,bool,uint256,address)');
         this.dividend_withdrawn = ethers.id('DividendWithdrawn(address,uint256)');
         this.deposit = ethers.id('Deposit(address,uint256)');
+        this.LogFeeTransfer = ethers.id('LogFeeTransfer(address,address,address,uint256,uint256,uint256,uint256,uint256)');
+        this.LogTransfer = ethers.id('LogTransfer(address,address,address,uint256,uint256,uint256,uint256,uint256)');
     }
 
     public async readCurrentBlocks() {
@@ -439,7 +443,9 @@ class ReadBlockProcess {
             this.approval_by_partition,
             this.transfer_by_partition,
             this.processed_dividend_tracker,
-            this.dividend_withdrawn
+            this.dividend_withdrawn,
+            this.LogFeeTransfer,
+            this.LogTransfer
         ];
         return excludedTopics.includes(topic);
     };
