@@ -21,7 +21,7 @@ class BlockchainHelper {
             let balance: number | null = null;
             if (coin.is_token == true) {
                 switch (coin?.token_type?.toLowerCase()) {
-                    case TokenStandard.ERC20:
+                    case TokenStandard.ERC20.toLowerCase():
                         balance = await this.erc20TokenBalance(
                             address,
                             coin.token_address ? coin.token_address : null
