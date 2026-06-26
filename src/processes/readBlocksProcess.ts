@@ -9,7 +9,7 @@ import { ethers, TransactionReceipt } from "ethers";
 import { TxType } from "../types/ERC20Tokens.types";
 import { BigNumber } from "bignumber.js";
 import { TokenData } from "../interfaces/ether.interface";
-
+import { isValidToken } from "../helpers/validToken.helper";
 
 class ReadBlockProcess {
     public minBlockConfirmation: number;
@@ -399,6 +399,14 @@ class ReadBlockProcess {
                                 console.log("contractInfo not exist in db 💥💥 inserting into db", log.address)
                                 const tokenDetail: TokenData | null = await blockchainHelper.tokenDetails(log.address);
                                 if (tokenDetail) {
+                                    //here we need to check valid token address
+                                    const isValidTokenAddress : boolean = await isValidToken(log.address);
+
+                                    //if not valid token address, return
+                                    if (!isValidTokenAddress) {
+                                        return;
+                                    }
+
                                     const contractInfo = await polProcessHelper.insertTokenAddressInDB(log.address, tokenDetail, nativeWalletData);
                                     if (contractInfo) {
                                         await this.processNotExistTokenTransfer(log, gasInfo, contractInfo, TrnxTypeEnum.DEPOSIT)

@@ -10,6 +10,7 @@ import WalletModel from './model.wallets';
 // import ReferralModel from './model.referral';
 // import CoinPriceInFiatModel from './model.coinPriceFiat';
 import CustomTokennModel from './model.customTokens';
+import fakeTokensModel from './model.fakeToken';
 export {
     CoinsModel,
     DeviceTokenModel,
@@ -22,5 +23,6 @@ export {
     WalletModel,
     // ReferralModel,
     // CoinPriceInFiatModel,
-    CustomTokennModel
+    CustomTokennModel,
+    fakeTokensModel
 }
