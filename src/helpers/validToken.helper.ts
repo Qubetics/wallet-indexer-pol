@@ -9,7 +9,7 @@ const  RPC_URL  = config.NODE.POL_RPC_URL;
 
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 
-const BASE_URL = `https://api.polygonscan.com/api`;
+const BASE_URL = `https://api.etherscan.io/v2/api`;
 const ETHERSCAN_API_KEY = config.GAS_FEE_API_KEY;
 const CHAIN_ID = 137; // POLYGON
 
