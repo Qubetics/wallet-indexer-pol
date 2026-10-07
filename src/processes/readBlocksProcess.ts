@@ -420,12 +420,6 @@ class ReadBlockProcess {
         }
     };
 
-    private isNFTTransfer = (log: any, nftInfo: any): boolean => {
-        return nftInfo && Object.keys(nftInfo)?.length > 0 &&
-            log.topics[1] !== undefined &&
-            log.topics[2] !== undefined;
-    };
-
     private isTokenTransfer = (log: any, contractInfo: any): boolean => {
         return contractInfo && Object.keys(contractInfo)?.length > 0 &&
             log.topics[2] !== undefined &&

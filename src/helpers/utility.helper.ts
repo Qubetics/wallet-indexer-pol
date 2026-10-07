@@ -49,10 +49,6 @@ class UtilityHelper {
     return value.toFixed();
   };
 
-  convertAmount = async (hexAmount: any) => {
-    return new BigNumber("0x" + hexAmount.toString());
-  };
-
   public async exponentialToDecimal(exponential: number) {
     let decimal: string = exponential.toString().toLowerCase();
     if (decimal.includes("e+")) {

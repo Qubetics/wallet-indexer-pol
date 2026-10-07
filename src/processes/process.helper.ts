@@ -89,17 +89,6 @@ class PolProcessHelper {
     }
   }
 
-  public getHashTable = async (keyName: string) => {
-    try {
-      const getAsync: any = promisify(redisClient.hvals).bind(redisClient)
-      const value: any = await getAsync(keyName)
-      return value;
-    } catch (err: any) {
-      console.error("Error in getHashTable>>>", err)
-      return null;
-    }
-  }
-
   public deleteKeyValuePair = async (keyName: string, field: string) => {
     try {
       redisClient.hdel(keyName, field.toUpperCase(), function (err) {

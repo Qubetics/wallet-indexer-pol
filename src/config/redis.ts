@@ -15,28 +15,6 @@ class RedisServer {
     });
   }
 
-  public async setRedisSting(key: string, value: number | string|any) {
-    this.client.set(key, value.toString());
-  }
-
-
-  public async getRedisSting(key: string) {
-    let value=this.client.get(key);
-     if(value){
-        return value;
-     }
-     return null;
-  }
-
-  public async del(key: any) {
-    try {
-      this.client.DEL(key)
-    } catch (error: any) {
-      console.error("delKey ERROR>>>>>>", error);
-      return null;
-    }
-  }
-
 }
 
 const redisClient = new RedisServer().client;

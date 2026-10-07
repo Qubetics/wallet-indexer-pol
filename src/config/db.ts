@@ -57,10 +57,6 @@ class Database implements DBInterface {
         console.error(`Unable to connect to the database: ${config.DB_NAME}`, error);
       });
   }
-
-  public async syncTables() {
-    await this.db_write.sync({ alter: true });
-  }
 }
 const db = new Database();
 export default {
