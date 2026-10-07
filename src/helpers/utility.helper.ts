@@ -3,7 +3,7 @@ import { dbHelper } from ".";
 import { NotificationInterface, NotificationModel } from "../models";
 import firebaseAdmin from 'firebase-admin';
 import { Op } from "sequelize";
-import { fcmServiceAccount } from "../constants/firebase.admin.key";
+import { config } from "../config";
 import { pushNotification } from "../interfaces/global.interface";
 
 class UtilityHelper {
@@ -11,7 +11,7 @@ class UtilityHelper {
   constructor() {
     (async () => {
       firebaseAdmin.initializeApp({
-        credential: firebaseAdmin.credential.cert(fcmServiceAccount),
+        credential: firebaseAdmin.credential.cert(config.config.FIREBASE_SERVICE_ACCOUNT),
       });
       this.messaging = firebaseAdmin.messaging();
     })();
