@@ -179,7 +179,6 @@ class DepositWithdrawProcess {
               [Op.like]: fromAddress,
             },
             coin_id: coinData.coin_id,
-            req_type: { [Op.notIn]: [TxReqTypesEnum.ALCHEMY, TxReqTypesEnum.TRANSAK] }
           },
           raw: true,
         });
@@ -208,7 +207,6 @@ class DepositWithdrawProcess {
               [Op.like]: toAddress,
             },
             coin_id: coinData.coin_id,
-            req_type: { [Op.notIn]: [TxReqTypesEnum.ALCHEMY, TxReqTypesEnum.TRANSAK] }
           },
           raw: true,
           logging: true
