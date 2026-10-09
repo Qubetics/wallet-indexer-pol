@@ -13,7 +13,7 @@ class POLPendingWithdrawalProcess {
       where: {
         status: 'completed',
         [Op.or]: [{ blockchain_status: null }, { blockchain_status: BlockChainStatusEnum.PENDING }],
-        req_type: { [Op.notIn]: ['TRANSAK', 'ALCHEMY', 'MERCURYO'] },
+        req_type: { [Op.in]: ['APP', 'EXNG'] },
         coin_family: config.STATIC_COIN_FAMILY.POL
       },
       raw: true
