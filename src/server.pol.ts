@@ -18,7 +18,6 @@ class POLStartProcess {
     this.balanceUpdateConsumer();
     this.balanceUpdateByWallet();
 
-    // this.testing_node()
   }
   public read_block_process() {
     schedule.scheduleJob("*/2 * * * * *", async function () {
@@ -26,11 +25,6 @@ class POLStartProcess {
       await pol_blocks_process.readBehindBlock();
     });
   }
-  // public testing_node() {
-  //   schedule.scheduleJob("*/2 * * * * *", async function () {
-  //     await pol_blocks_process.testingNode();
-  //   });
-  // }
   public readSpecificBlock() {
     schedule.scheduleJob("*/1 * * * *", async function () {
       await pol_blocks_process.readSpecificBlock();

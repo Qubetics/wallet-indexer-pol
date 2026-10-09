@@ -108,7 +108,6 @@ class PolTxStatusUpdateProcess {
       } else if (txData.coin?.token_type?.toLowerCase() == TokenStandard.ERC20) {
         coin_data = await polProcessHelper.checkIfContract(txData.coin.token_address);
       }
-      //let coin_data: any = await polProcessHelper.CoinByCoinId(txData.coin_id);
       const trx_data = {
         coin_id: txData?.coin.coin_id,
         status: txData?.status,

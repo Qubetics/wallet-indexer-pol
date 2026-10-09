@@ -36,11 +36,6 @@ class POLPendingWithdrawalProcess {
         return this.addTxToQueue(trnx); // Directly return the promise
       }));
     }
-    // if (tx.length > 0) {
-    //   for await (const el of tx) {
-    //     await this.addTxToQueue(el);
-    //   }
-    // }
   };
 
   public addTxToQueue = async (data: { tx_id: string; coin_id: number }) => {

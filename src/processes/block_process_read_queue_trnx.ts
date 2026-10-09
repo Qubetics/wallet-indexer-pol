@@ -81,7 +81,6 @@ class queue_transactions {
         try {
             if (txReceipt.status !== 0 && txReceipt.logs.length > 0) {
                 for await (const log of txReceipt.logs) {
-                    // console.log('isToken >>>', log.address, '-----', data.tx_id, isToken);
                     if (log?.topics && log.topics[2] !== undefined && log?.topics[0] !== undefined) {
                         if (log.topics[0] == this.approval) {
                             continue;

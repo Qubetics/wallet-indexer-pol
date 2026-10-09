@@ -83,7 +83,6 @@ class BlockchainHelper {
         } catch (error) {
             console.error(`Pol_Helper ERC20_Token_Fetch_Balance error >>`, error);
             return null;
-            // throw error;
         }
     }
     private ERC721_Token_Fetch_Balance = async (
@@ -104,7 +103,6 @@ class BlockchainHelper {
         } catch (error) {
             console.error(`Pol_Helper ERC20_Token_Fetch_Balance error >>`, error);
             return null;
-            // throw error;
         }
     }
     public Coin_Fetch_Balance = async (
@@ -122,10 +120,8 @@ class BlockchainHelper {
         } catch (error: any) {
             console.error(`POL_Helper Coin_Fetch_Balance error >>`, error);
             return null;
-            // throw error;
         }
     }
-
 
 
 }

@@ -28,11 +28,6 @@ class UpdateBalanceController {
           partition: any;
           message: any;
         }) => {
-          // console.log("🚀 ~ startTxStatusUpdateQueue topic >>>>", topic);
-          // console.log(
-          //   "🚀 ~ startTxStatusUpdateQueue message.value >>>>",
-          //   message.value.toString()
-          // );
           await this.updateBalance(JSON.parse(message.value.toString()));
         },
       })
