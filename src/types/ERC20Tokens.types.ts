@@ -2,8 +2,6 @@ import {
   BlockChainStatusEnum,
   TrnxTypeEnum
 } from "../enum";
-// import { coinData } from "../interfaces/global.interface";
-// import { CoinInterface } from "../models";
 
 export type WalletAddresses = {
   wallet_address: string;

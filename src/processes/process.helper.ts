@@ -138,7 +138,6 @@ class PolProcessHelper {
           );
         }
       }
-      // redisClient.set(config.TOKEN_TYPE_BSC || "", JSON.stringify(tokens));
     } catch (err: any) {
       console.error('fetchERC20Tokens >>>>>', err);
       await dbHelper.saveErrorLogs('Pol_fetchERC20Tokens', err.message)
@@ -174,9 +173,6 @@ class PolProcessHelper {
   public checkIfContract = async (address: string) => {
     try {
       const token_data: any = await this.getKeyValuePair(config.TOKEN_TYPE_POL, address);
-      // if (token_data) {
-      //   console.log("token_data>>>>>>>>", token_data)
-      // }
       return JSON.parse(token_data);
     } catch (err: any) {
       console.error('checkIfContract >>>>>', err);
@@ -184,60 +180,10 @@ class PolProcessHelper {
     }
   };
 
-  // public checkIfContract = async (address: string) => {
-  //   try {
-  //     const getAsync = promisify(redisClient.get).bind(redisClient);
-  //     const value = await getAsync(config.TOKEN_TYPE_BSC || "");
-
-  //     const erc20Tokens: CoinInterface[] = value ? JSON.parse(value) : [];
-  //     const token = erc20Tokens.find(
-  //       (el: any) => Number(el.is_token) === Number(BooleanEnum.true) && el.token_address?.toUpperCase() === address?.toUpperCase()
-  //     );
-  //     if (token) return token;
-  //     return null;
-  //   } catch (error: any) {
-  //     console.error('checkIfContract >>>', error);
-  //     return null;
-  //   }
-  // };
-
-  // public fetchERC721Tokens = async () => {
-  //   try {
-  //     const getTokenQuery = `SELECT * FROM coins WHERE coin_status=1 AND coin_family=${config.STATIC_COIN_FAMILY.POL} AND (token_type!='${config.TOKEN_TYPE_POL}' OR token_type is null)`;
-
-  //     const tokens: CoinInterface[] = await database.db_read.query(getTokenQuery, {
-  //       type: Sequelize.QueryTypes.SELECT,
-  //     });
-
-  //     redisClient.set(config.TOKEN_TYPE721_POL, JSON.stringify(tokens));
-  //   } catch (error: any) {
-  //     console.error('fetchERC721Tokens >>>>', error);
-  //   }
-  // };
-
-  // public checkIfOurNFTContract = async (address: string) => {
-  //   try {
-  //     const getAsync = promisify(redisClient.get).bind(redisClient);
-  //     const value = await getAsync(config.TOKEN_TYPE721_BSC);
-  //     const erc721Tokens: CoinInterface[] = value ? JSON.parse(value) : [];
-  //     const token = erc721Tokens.find(
-  //       (el: any) => Number(el.is_token) === Number(BooleanEnum.true) && el.token_address.toUpperCase() === address?.toUpperCase()
-  //     );
-
-  //     if (token) return token;
-  //     return null;
-  //   } catch (error: any) {
-  //     console.error('checkIfOurNFTContract >>>>>', error);
-  //     return null;
-  //   }
-  // };
 
   public checkOurWalletAddress = async (address: string) => {
     try {
       const walletData: any = await this.getKeyValuePair(config.POL_WALLET_ADDRESS, address);
-      // if (walletData) {
-      //   console.log("walletData>>>>>>>>", walletData)
-      // }
       return walletData ? JSON.parse(walletData) : null;
     } catch (err: any) {
       console.error('checkOurWalletAddress >>>>>', err);
@@ -245,36 +191,6 @@ class PolProcessHelper {
     }
   };
 
-  // public NativeCoinByCoinFamily = async (coin_family: CoinFamilyEnum) => {
-  //   try {
-  //     const getAsync = promisify(redisClient.get).bind(redisClient);
-  //     const value = await getAsync(config.TOKEN_TYPE_BSC || "");
-  //     const erc20Tokens: CoinInterface[] = value ? JSON.parse(value) : [];
-  //     return erc20Tokens.find(
-  //       (el: CoinInterface) => Number(el.is_token) === Number(BooleanEnum.false) && el.coin_family === coin_family
-  //     );
-
-  //   } catch (err: any) {
-  //     console.error(`NativeCoinByCoinFamily >>>`, err);
-  //     return 0;
-  //   }
-  // }
-
-  // public CoinByCoinId = async (coin_id: number) => {
-  //   try {
-  //     const getAsync = promisify(redisClient.get).bind(redisClient);
-  //     const value = await getAsync(config.TOKEN_TYPE_BSC || "");
-
-  //     const erc20Tokens: CoinInterface[] = value ? JSON.parse(value) : [];
-  //     return erc20Tokens.find(
-  //       (el: CoinInterface) => el.coin_id === coin_id
-  //     );
-
-  //   } catch (err: any) {
-  //     console.error(`CoinByCoinId >>>`, err);
-  //     return null;
-  //   }
-  // }
 
   public behindBlocks = async () => {
     try {
@@ -403,7 +319,6 @@ class PolProcessHelper {
       }
 
 
-      //if token not exist in db then add it to db
       const coinData: any = await this.addCoinToTable(
         tokenAddress,
         symbol,

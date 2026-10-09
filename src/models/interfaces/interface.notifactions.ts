@@ -1,5 +1,4 @@
 export interface NotificationInterface {
-  // title: string;
   notification_id?: number;
   message: string;
   amount: any;

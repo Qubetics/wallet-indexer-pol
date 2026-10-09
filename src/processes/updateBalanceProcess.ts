@@ -106,9 +106,7 @@ class UpdateBalanceProcess {
               },
             }
           );
-          //console.log(`Balance updated for ${data.wallet_address}: ${balance}`);
         } else {
-          //console.log(`Balance unchanged for ${data.wallet_address}: ${balance}`);
         }
       } else {
         if (data.queue_count <= 5) {
@@ -144,12 +142,10 @@ class UpdateBalanceProcess {
         config.config.REDISKEYS.ALL_PROCESSES,
         GLOBALBALANCEUPDATECOUNT
       );
-      //console.log("🚀 ~ polUpdateBalanceController ~ publicupdateWalletBalanceByWal ~ findCoinCounter:",findCoinCounter);
 
       if (findCoinCounter) {
         coin_limit_count = Number(findCoinCounter);
       }
-      // console.log("🚀 ~ polUpdateBalanceController ~ publicupdateWalletBalanceByWal ~ coin_limit_count:",coin_limit_count);
       const wallets: any = await WalletModel.findAll({
         attributes: ["wallet_address", "balance"],
         where: {
@@ -166,7 +162,6 @@ class UpdateBalanceProcess {
         offset: coin_limit_count,
         order: [['wallet_id', 'ASC']],
         nest: true,
-        // logging: true,
       });
       if (!wallets) {
         await polProcessHelper.setKeyValuePair(
@@ -193,7 +188,6 @@ class UpdateBalanceProcess {
         }
       }
       if (wallets.length < limit) {
-        // console.log("inside wallets limit");
         await polProcessHelper.setKeyValuePair(
           config.config.REDISKEYS.ALL_PROCESSES,
           GLOBALBALANCEUPDATECOUNT,
@@ -201,14 +195,12 @@ class UpdateBalanceProcess {
         );
       } else {
         coin_limit_count += limit;
-        // console.log("incrementing cnt");
         await polProcessHelper.setKeyValuePair(
           config.config.REDISKEYS.ALL_PROCESSES,
           GLOBALBALANCEUPDATECOUNT,
           coin_limit_count.toString()
         );
       }
-      // console.log("\nEND");
       return true;
     } catch (err: any) {
       console.error("Error in updateWalletBalanceByWallet", err);
@@ -217,4 +209,3 @@ class UpdateBalanceProcess {
 }
 export const updateBalanceProcess = new UpdateBalanceProcess();
 
-// export default new UpdateBalanceController();
