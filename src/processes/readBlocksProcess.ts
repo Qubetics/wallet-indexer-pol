@@ -95,7 +95,6 @@ class ReadBlockProcess {
                 BLOCK_DIFFERENCE: toBlockNumber - blockNumber,
                 TO_BLOCK_NUMBER: toBlockNumber
             });
-            // await this.getTxFromBlock(blockNumber, KEYS.latestBlock);
             this.getBlockReceipts(blockNumber);
             this.getTraceBlock(blockNumber);
         } catch (err: any) {
@@ -114,7 +113,6 @@ class ReadBlockProcess {
                     let { id, start_block, end_block } = data_exists;
                     if (end_block > start_block) {
                         console.log("This block go for getTxFromBlock")
-                        // await this.getTxFromBlock(start_block, KEYS.behinedBlock);
                         this.getBlockReceipts(start_block);
                         this.getTraceBlock(start_block);
                         start_block = start_block + 1;
@@ -150,7 +148,6 @@ class ReadBlockProcess {
             const specific_block: any = JSON.parse(specificBlocks);
             if (specific_block && Number(specific_block) > 0) {
                 console.table({ SPECIFIC_BLOCK: specific_block })
-                // await this.getTxFromBlock(specific_block, KEYS.readSpecificBlock)
                 this.getBlockReceipts(specific_block);
                 this.getTraceBlock(specific_block);
                 await polProcessHelper.setKeyValuePair(config.REDISKEYS.ALL_PROCESSES, config.REDISKEYS.SPECIFIC_BLOCK_POL, '0')
@@ -238,7 +235,6 @@ class ReadBlockProcess {
             if (response?.length > 0) {
                 const allValueCalls = await this.processTraces(response);
 
-                // console.log("All calls with value > 0:", allValueCalls);
 
                 // Save to Kafka
                 for (const call of allValueCalls) {
@@ -252,7 +248,6 @@ class ReadBlockProcess {
                         blockNumber: blockId,
                     };
 
-                    //   console.log(`Processed Tx at depth ${call.depth}`, txReceipt);
                     this.addTraceTxToQueue(txReceipt, this.trace_block_eth_deposit_topic);
                 }
 
@@ -507,7 +502,6 @@ class ReadBlockProcess {
                 data.toAddress
             ) {
 
-                // console.log("inside checkEthDeposit this is data.toAddress ", data.toAddress)
 
                 const addresses = [data.fromAddress, data.toAddress].filter(Boolean);
 
@@ -571,7 +565,6 @@ class ReadBlockProcess {
 
     private async checkAddressInDB(txData: TxType) {
         try {
-            // let ourTrnx: any = null;
             const addresses = [txData.fromAddress, txData.toAddress].filter(Boolean);
 
             if (addresses.length > 0) {

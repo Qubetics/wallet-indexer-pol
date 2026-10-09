@@ -1,14 +1,3 @@
-//need  to confirm keep this or remove
-// export interface blocks_trnx {
-//     block_number: number,
-//     tx_id: string | '',
-//     value: string | '',
-//     fromAddress: string | '',
-//     toAddress: string | '',
-//     retry_count: number,
-//     key: string | null,
-//     pair: string | null
-// }
 export interface pushNotification {
     title: string,
     notification_id?: number;

@@ -5,7 +5,6 @@ import polProcessHelper from "./process.helper";
 import { BlockChainStatusEnum, BooleanEnum, NotificationTypeEnum, TrnxTypeEnum, TxReqTypesEnum } from "../enum";
 import { dbHelper, utilityHelper, walletHelper } from "../helpers"
 import { Op } from "sequelize";
-// import { globalHelper } from "../helpers/global.helper";
 import WalletModel from "../models/tables/model.wallets";
 import kafkaHelper from "../config/kafka.helper";
 import { coinData, pushNotification } from "../interfaces/global.interface";
@@ -141,7 +140,6 @@ class DepositWithdrawProcess {
       const txHash: string = trnxData.txId;
       const toAddress: string = trnxData.toAddress;
       const fromAddress: string = trnxData.fromAddress;
-      // const coin: coinData = trnxData.coin;
       const amount: number = trnxData.amount;
       const status: string = trnxData.status;
 
@@ -228,17 +226,12 @@ class DepositWithdrawProcess {
 
       const addresses = [fromAddress, toAddress].filter(Boolean);
       const results = await polProcessHelper.getMultipleKeyValuePairs(`${config.POL_WALLET_ADDRESS}`, addresses);
-      // console.log('results 2222222222 >>>>', results);
       if (results) {
         const [addressWithdraw, addressDeposit]: any = results as string[];
 
-        // const AddressWithdraw: any = await bscProcessHelper.check_our_wallet_address(from_address);
-        // const Addressdeposit: any = await bscProcessHelper.check_our_wallet_address(to_address);
 
         const userId: number = addressWithdraw ? JSON.parse(addressWithdraw)?.user_id : 0;
         const toUserId: number = addressDeposit ? JSON.parse(addressDeposit)?.user_id : 0;
-        // const user_id: number = AddressWithdraw ? AddressWithdraw.user_id : 0;
-        // const to_user_id: number = Addressdeposit ? Addressdeposit.user_id : 0;
 
         const trx_data: any = {
           user_id: userId,
@@ -284,7 +277,6 @@ class DepositWithdrawProcess {
             coin_family: trx_data?.coin_family,
             tx_type: tx_type,
             notification_type: trnxTypeD,
-            // state: "confirmed"
           };
           utilityHelper.SendNotification(notifData);
         }
@@ -340,7 +332,6 @@ class DepositWithdrawProcess {
             coin_id: coinData.coin_id,
             coin_family: trx_data?.coin_family,
             notification_type: trnxTypeW,
-            // state: "confirmed"
           };
 
           utilityHelper.SendNotification(notifData);

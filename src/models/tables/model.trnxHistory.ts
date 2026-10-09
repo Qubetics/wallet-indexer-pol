@@ -114,10 +114,6 @@ const dataObj = {
     },
 };
 
-// const dataObjIndex = {
-//     createdAt: 'created_at',
-//     updatedAt: 'updated_at'
-// }
 const dataObjIndex = {
     createdAt: 'created_at',
     updatedAt: 'updated_at',

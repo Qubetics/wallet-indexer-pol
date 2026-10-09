@@ -162,7 +162,6 @@ class UtilityHelper {
           coin_family: data.coin_family,
           tx_type: data.tx_type,
           view_status: "0",
-          // state: "0",
         };
         await NotificationModel.create(notificationModel);
       }
