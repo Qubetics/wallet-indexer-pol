@@ -24,11 +24,6 @@ class POLStartProcess {
       await polBlocksProcess.readBehindBlock()
     });
   }
-  // public testing_node() {
-  //   schedule.scheduleJob("*/2 * * * * *", async function () {
-  //     await polBlocksProcess.testingNode();
-  //   });
-  // }
   public readSpecificBlock() {
     schedule.scheduleJob('*/1 * * * *', async function () {
       await polBlocksProcess.readSpecificBlock();

@@ -91,7 +91,6 @@ class PolDepositWithdrawProcess {
     if (data.amount == 0) {
       console.log("amount === 0")
     } else {
-      // console.log("amount is more than 0", data)
       let coin_data: any = null;
       if (data.token) {
         coin_data = data.token;
@@ -113,7 +112,6 @@ class PolDepositWithdrawProcess {
         txType: data.txType,
         trnx_fee: data.trnx_fee
       };
-      // console.log(webhookTx, "DEPOSIT");
       await this.SaveNewTrnx(webhookTx);
     }
   };
@@ -195,10 +193,6 @@ class PolDepositWithdrawProcess {
       console.log('results 2222222222 >>>>', results);
       if (results) {
         const [addressWithdraw, addressDeposit]: any = results as string[];
-        // console.log('addressWithdraw >>.', addressWithdraw);
-        // console.log('addressDeposit >>.', addressDeposit);
-        // console.log('addressWithdraw >>.', JSON.parse(addressWithdraw)?.user_id);
-        // console.log('addressDeposit >>.', JSON.parse(addressDeposit)?.user_id);
         const user_id: number = addressWithdraw ? JSON.parse(addressWithdraw)?.user_id : 0;
         const to_user_id: number = addressDeposit ? JSON.parse(addressDeposit)?.user_id : 0;
 
@@ -250,7 +244,6 @@ class PolDepositWithdrawProcess {
             coin_family: coin.coin_family,
             tx_type: tx_type,
             notification_type: trnxTypeD,
-            // state: "confirmed"
           };
           utilityHelper.SendNotification(notifData);
         }
@@ -308,7 +301,6 @@ class PolDepositWithdrawProcess {
             coin_family: coin.coin_family,
             coin_id: coin.coin_id,
             notification_type: trnxTypeW,
-            // state: "confirmed"
           };
 
           utilityHelper.SendNotification(notifData);
