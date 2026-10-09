@@ -5,7 +5,6 @@ import { config } from '../config';
 import { AbiItem } from 'web3-utils';
 
 class BlockchainHelper {
-    // public REDIS_TOKENS: any = CONFIG.REDISKEYS.TOKENS;
     public Web3: Web3;
     public FULLNODE: string = config.config.NODE.POL_RPC_URL;
     constructor() {
@@ -81,7 +80,6 @@ class BlockchainHelper {
             return 0;
         } catch (error) {
             console.error(`BscHelper BEP20_Token_Fetch_Balance error >>`, error);
-            // return 0;
 
             throw error;
         }
@@ -102,7 +100,6 @@ class BlockchainHelper {
             return 0;
         } catch (error) {
             console.error(`Bsc_Helper BEP20_Token_Fetch_Balance error >>`, error);
-            // return 0;
             throw error;
         }
     }
@@ -118,12 +115,10 @@ class BlockchainHelper {
             return Number(coinBalance || 0);
         } catch (error: any) {
             console.error(`POL_Helper Coin_Fetch_Balance error >>`, error);
-            //return 0;
 
             throw error;
         }
     }
-
 
 
 }

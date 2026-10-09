@@ -1,7 +1,6 @@
 import axios from "axios";
 import { config } from "../config/config";
 import { CatchErrorMsgsModel, CoinInterface } from "../models";
-// import WalletModel from "../models/tables/model.wallets";
 import { WalletModel, CustomTokennModel } from "../models/tables/index"
 import polProcessHelper from "../processes/process.helper";
 
@@ -20,7 +19,6 @@ class Global_helper {
                 wallet_data = await polProcessHelper.check_our_wallet_address(wallet_address)
                 let data_obj: any = {
                     user_id: wallet_data.user_id,
-                    // email: wallet_data.email,
                     wallet_name: wallet_data.wallet_name,
                     wallet_address: wallet_address,
                     coin_id: coin.coin_id,
