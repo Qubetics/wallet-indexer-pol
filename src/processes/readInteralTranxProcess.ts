@@ -36,11 +36,6 @@ class ReadInternalTxProcess {
         return this.addTxToQueue(trnx); // Directly return the promise
       }));
     }
-    // if (tx.length > 0) {
-    //   for await (const el of tx) {
-    //     await this.addTxToQueue(el);
-    //   }
-    // }
   };
 
   private addTxToQueue = async (data: pendingTrnx) => {

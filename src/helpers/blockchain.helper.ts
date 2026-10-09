@@ -61,7 +61,6 @@ class BlockchainHelper {
         } catch (err: any) {
             console.error(`erc20TokenBalance error >>`, err);
             return null;
-            // throw err;
         }
     }
 
@@ -76,7 +75,6 @@ class BlockchainHelper {
         } catch (err: any) {
             console.error(`polCoinBalance error >>`, err);
             return null;
-            // throw err;
         }
     }
 

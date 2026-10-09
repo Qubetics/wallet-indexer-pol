@@ -4,7 +4,6 @@ import { NotificationInterface, TrnxHistoryModel } from "../models";
 import { utilityHelper, walletHelper, blockchainHelper, dbHelper } from "../helpers";
 import polProcessHelper from "./process.helper";
 import { Op } from "sequelize";
-// import { globalHelper } from "../helpers/global.helper";
 import kafkaHelper from "../config/kafka.helper";
 import { ethers, TransactionReceipt, TransactionResponse } from "ethers";
 import { coinData, pendingTrnx, pushNotification, trnxStatusUpdate, updateBroadCastTrnx } from "../interfaces/global.interface";
@@ -88,19 +87,6 @@ class UpdateInternalTrnxStatusProcess {
     // Start the consumer with reconnection
     await startWithReconnection();
   };
-  // public startTxStatusUpdateConsumer = async () => {
-  //   const consumer = await kafkaHelper.kafka.consumer({ groupId: this.bsc_pending_withdrawal_tx_group_id });
-  //   await consumer.subscribe({ topic: this.bsc_pending_withdrawal_tx_topic, fromBeginning: true });
-  //   await consumer.run({
-  //     eachMessage: async ({ topic, partition, message }: { topic: any, partition: any, message: any }) => {
-  //       console.log("🚀 ~ startTxStatusUpdateQueue topic >>>>", topic);
-  //       console.log("🚀 ~ startTxStatusUpdateQueue message.value >>>>", message.value.toString());
-  //       await this.getTx(JSON.parse(message.value.toString()))
-  //     }
-  //   }).catch((err: Error) => {
-  //     console.log("🔥 ~ ~ startTxStatusUpdateQueue error", err);
-  //   });
-  // };
 
   private getTx = async (data: pendingTrnx) => {
     try {
@@ -173,8 +159,6 @@ class UpdateInternalTrnxStatusProcess {
       }
       console.log('coin_data >>', coinData);
       if (coinData) {
-        // let coin_data: any = await bscProcessHelper.CoinByCoinId(txData.coin_id);
-        // const coin_data: any = await CoinsModel.findOne({ attributes: ['is_token', 'token_type', 'coin_symbol', 'coin_family', 'cmc_id', 'coin_symbol', 'added_by'], where: { coin_id: txData.coin_id } });
         const trxData: updateBroadCastTrnx = {
           status: txData?.status,
           txId: txData?.txId,
@@ -197,7 +181,6 @@ class UpdateInternalTrnxStatusProcess {
       } else {
         console.log('coin does not exists', coinData);
       }
-
 
 
     } catch (err: any) {
@@ -240,7 +223,6 @@ class UpdateInternalTrnxStatusProcess {
           if (results) {
             const [addressWithdraw, addressDeposit]: any = results as string[];
 
-            // const AddressWithdraw: any = await bscProcessHelper.check_our_wallet_address(from_address);
             if (addressWithdraw) {
               /** update withdraw user Pol balance */
               if (txType !== TrnxTypeEnum.DAPP) {
@@ -289,14 +271,11 @@ class UpdateInternalTrnxStatusProcess {
                 coin_family: trxData?.coin?.coinFamily,
                 tx_type: txType,
                 notification_type: trnxTypeW,
-                // state: "confirmed"
               };
               utilityHelper.SendNotification(notifData);
             }
-            //const Addressdeposit: any = await bscProcessHelper.check_our_wallet_address(to_address);
             if (addressDeposit) {
               const toUserId: number = addressDeposit ? JSON.parse(addressDeposit)?.user_id : 0;
-              // const to_user_id: number = Addressdeposit ? Addressdeposit.user_id : 0;
               const trnxTypeD: string = "Deposit";
               /** update to adrs wallet balance */
               if (toAddress !== fromAddress) {
@@ -327,7 +306,6 @@ class UpdateInternalTrnxStatusProcess {
                 coin_family: trxData?.coin?.coinFamily,
                 tx_type: txType,
                 notification_type: trnxTypeD,
-                // state: "confirmed"
               };
               utilityHelper.SendNotification(notifData);
             }
@@ -366,7 +344,6 @@ class UpdateInternalTrnxStatusProcess {
             coin_family: trxData?.coin?.coinFamily,
             tx_type: txType,
             notification_type: trnxTypeW,
-            // state: "failed"
           };
           utilityHelper.SendNotification(notifData);
 
