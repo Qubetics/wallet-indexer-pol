@@ -3,7 +3,6 @@ import { config } from "../config/config";
 import polProcessHelper from "./process.helper";
 import { KEYS } from "../enum";
 import { blocks_trnx } from "../interfaces/global_helper";
-// import rabbitMq from "../config/rabbitMq";
 import { PolOldBLockModel } from "../models";
 import { Op } from "sequelize";
 import { global_helper } from "../helpers/global_helper";
@@ -26,10 +25,6 @@ class Pol_block_process {
     public async getBlocks() {
         try {
             /** Testing */
-            // let { getBlockNumber } = Blockchain_Helper.Web3.eth;
-            // let latestBlock = await getBlockNumber();
-            // console.log("latestBlock>>", latestBlock)
-            // return;
             let old_block: any = await polProcessHelper.getKeyValuePair(config.REDISKEYS.POL_BLOCKS, config.REDISKEYS.OLD_BLOCK_POL)
             let new_block: any = await polProcessHelper.getKeyValuePair(config.REDISKEYS.POL_BLOCKS, config.REDISKEYS.NEW_BLOCK_POL)
             if (!old_block) {
@@ -66,10 +61,8 @@ class Pol_block_process {
     }
     public async readBlocks(blockNumber: number, toBlockNumber: number) {
         try {
-            // console.log("blockNumber", blockNumber)
             let block_updated: number = blockNumber + 1;
             await polProcessHelper.setKeyValuePair(config.REDISKEYS.POL_BLOCKS, config.REDISKEYS.OLD_BLOCK_POL, block_updated.toString());
-            // console.log("blockNumber updated", block_updated)
             console.table({
                 LATEST_BLOCK: blockNumber,
                 BLOCK_DIFFERENCE: toBlockNumber - blockNumber,
@@ -95,7 +88,6 @@ class Pol_block_process {
                 return; // Exit early if there are no transactions
             }
             const transactionPromises = blockInfo.transactions.map(async (tx) => {
-                // console.log('tx.hash >>', tx.hash, 'blockId >>>', blockId);
                 const data: blocks_trnx = {
                     block_number: blockId,
                     tx_id: tx.hash || '',
@@ -112,47 +104,11 @@ class Pol_block_process {
 
                 try {
                     await kafkaHelper.produceMessage(targetTopic, data);
-                    // If you were using RabbitMQ, you'd uncomment the appropriate line:
-                    // const queue = (key === KEYS.latestBlock) ? config.TRANSACTIONS.eth_all_blocks : config.KAFKA_BLOCKS.eth_behined_block_topic;
-                    // rabbitMq.send_tx_to_queue(queue, Buffer.from(JSON.stringify(data)));
                 } catch (err) {
                     console.error("Error while producing message for transaction", tx.hash, err);
                 }
             });
             await Promise.allSettled(transactionPromises);
-            // if (blockInfo) {
-            //     if (blockInfo.transactions) {
-            //         for await (let tx of blockInfo.transactions) {
-            //             console.log('tx.hash >>', tx.hash, 'blockId >>>', blockId);
-            //             let data: blocks_trnx = {
-            //                 block_number: blockId,
-            //                 tx_id: tx.hash ? tx.hash : '',
-            //                 value: tx.value ? tx.value : '',
-            //                 fromAddress: tx.from ? tx.from : '',
-            //                 toAddress: tx.to ? tx.to : '',
-            //                 retry_count: 0,
-            //                 key: null,
-            //                 pair: null
-            //             }
-            //             if (key == KEYS.latestBlock) {
-            //                 data.key = 'latest';
-            //                 // let queue_length: any = await rabbitMq.queue_length(config.TRANSACTIONS.pol_all_blocks)
-            //                 // console.log("queue_length>>>", queue_length)
-            //                 await kafkaHelper.produceMessage(this.pol_block_tx_topic, data);
-            //                 //rabbitMq.send_tx_to_queue(config.TRANSACTIONS.pol_all_blocks, Buffer.from(JSON.stringify(data)))
-            //             } else {
-            //                 data.key = 'behined & specific'
-            //                 await kafkaHelper.produceMessage(this.pol_behind_block_tx_topic, data);
-            //                 //rabbitMq.send_tx_to_queue(config.KAFKA_BLOCKS.pol_behined_block_topic, Buffer.from(JSON.stringify(data)))
-            //             }
-            //         }
-            //     } else {
-            //         console.log("no block info trnasactions")
-            //     }
-            // } else {
-            //     console.log("No blockinfo");
-            //     await PolOldBLockModel.create({ block_number: blockId, coin_family: config.STATIC_COIN_FAMILY.BNB, start_block: blockId, end_block: blockId, status: 0 })
-            // }
         } catch (err: any) {
             console.error("Error in getTxFromBlock:", (err as Error).message);
             await global_helper.save_error_logs('Pol_readBehindBlock', err.message)
@@ -183,7 +139,6 @@ class Pol_block_process {
                         await polProcessHelper.setKeyValuePair(config.BLOCKS, config.READ_BEHINED_BLOCK_POL, JSON.stringify(add_data))
                     } else {
                         console.log("id>>>>>>>>>>>", id)
-                        // await PolOldBLockModel.destroy({ where: { id: id } })
                         await PolOldBLockModel.update({ status: 1 }, { where: { id: id } })
                         await polProcessHelper.deleteKeyValuePair(config.BLOCKS, config.READ_BEHINED_BLOCK_POL)
                         await polProcessHelper.behindBlocks();
@@ -194,15 +149,6 @@ class Pol_block_process {
                 await polProcessHelper.behindBlocks()
             }
 
-            // REDIS BASED
-            // let data: any = await polProcessHelper.getHashTable(config.READ_BEHINED_BLOCK_POL)
-            // console.log("data?>>??", data.length)
-            // if (data.length > 0) {
-            //     for (let i: number = 0; i < data.length; i++) {
-            //         await pol_blocks_process.getTxFromBlock(Number(data[i]), KEYS.behinedBlock);
-            //         await polProcessHelper.deleteKeyValuePair(config.READ_BEHINED_BLOCK_POL, data[i].toString())
-            //     }
-            // }
         } catch (err: any) {
             console.error("Error in readBehindBlock>>", err)
             await global_helper.save_error_logs('POL_readBehindBlock', err.message)
