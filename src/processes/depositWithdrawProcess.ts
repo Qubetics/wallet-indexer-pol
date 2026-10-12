@@ -1,5 +1,5 @@
 import { TxType, WebHookTxType } from "../types/ERC20Tokens.types";
-import { NotificationInterface, TrnxHistoryModel } from "../models";
+import { TrnxHistoryModel } from "../models";
 import { config } from "../config/config";
 import polProcessHelper from "./process.helper";
 import { BlockChainStatusEnum, BooleanEnum, NotificationTypeEnum, TrnxTypeEnum, TxReqTypesEnum } from "../enum";

@@ -2,7 +2,7 @@ import { config } from "../config";
 import kafkaHelper from "../config/kafka.helper";
 import { CoinFamilyEnum } from "../enum";
 import { coinData } from "../interfaces/global.interface";
-import { CoinInterface, CoinsModel } from "../models";
+import { CoinsModel } from "../models";
 import WalletModel from "../models/tables/model.wallets";
 import { blockchainHelper } from "./blockchain.helper";
 import { utilityHelper } from "./utility.helper";
