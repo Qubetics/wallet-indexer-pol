@@ -4,7 +4,6 @@ import polProcessHelper from "./process.helper";
 import { KEYS } from "../enum";
 import { blocks_trnx } from "../interfaces/global_helper";
 import { PolOldBLockModel } from "../models";
-import { Op } from "sequelize";
 import { global_helper } from "../helpers/global_helper";
 import kafkaHelper from "../config/kafka.helper";
 
