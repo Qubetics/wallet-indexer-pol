@@ -3,15 +3,7 @@ import {
     BooleanEnum,
 } from "../enum";
 
-import {
-    CatchErrorMsgsModel,
-    CoinInterface,
-    CoinsModel,
-    CustomTokennModel,
-    DeviceTokenModel,
-    WalletModel,
-    // WalletModel
-} from "../models/index";
+import { CatchErrorMsgsModel, CoinsModel, CustomTokennModel, DeviceTokenModel, WalletModel } from "../models/index";
 import polProcessHelper from "../processes/process.helper";
 import { config } from "../config/config";
 import { coinData } from "../interfaces/global.interface";

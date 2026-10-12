@@ -1,6 +1,6 @@
 import { config } from "../config/config";
 import { BlockChainStatusEnum, BooleanEnum, NotificationTypeEnum, TokenStandard, TrnxTypeEnum } from "../enum";
-import { NotificationInterface, TrnxHistoryModel } from "../models";
+import { TrnxHistoryModel } from "../models";
 import { utilityHelper, walletHelper, blockchainHelper, dbHelper } from "../helpers";
 import polProcessHelper from "./process.helper";
 import { Op } from "sequelize";
