@@ -6,7 +6,7 @@ import polProcessHelper from "./process.helper";
 import { Op } from "sequelize";
 import { globalHelper } from "../helpers/global.helper"
 import kafkaHelper from "../config/kafka.helper";
-import { ethers, TransactionReceipt, TransactionResponse } from "ethers";
+import { ethers, TransactionResponse } from "ethers";
 import { pendingTrnx } from "../interfaces/globalHelper";
 
 class PolTxStatusUpdateProcess {

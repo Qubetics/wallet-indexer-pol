@@ -1,10 +1,9 @@
 import database from "../config/db";
-import Sequelize, { QueryTypes } from "sequelize";
+import { QueryTypes } from "sequelize";
 import { CoinInterface, coinsModel, polOldBLockModel, WalletInterface } from "../models";
 import redisClient from "../config/redis";
 import { promisify } from "util";
 import { config } from "../config/config";
-import { BooleanEnum, CoinFamilyEnum } from "../enum";
 import { globalHelper } from "../helpers/global.helper";
 import { blockchainHelper } from "../helpers";
 import { Op } from "sequelize";
