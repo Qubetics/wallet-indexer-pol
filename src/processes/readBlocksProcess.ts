@@ -444,7 +444,9 @@ class ReadBlockProcess {
             this.dividend_withdrawn,
             this.LogFeeTransfer,
             this.LogTransfer,
-            this.DelegateChanged
+            this.DelegateChanged,
+            this.swap,
+            this.deposit
         ];
         return excludedTopics.includes(topic);
     };
