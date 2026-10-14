@@ -434,7 +434,9 @@ class ReadBlockProcess {
             this.processed_dividend_tracker,
             this.dividend_withdrawn,
             this.LogFeeTransfer,
-            this.LogTransfer
+            this.LogTransfer,
+            this.swap,
+            this.deposit
         ];
         return excludedTopics.includes(topic);
     };
