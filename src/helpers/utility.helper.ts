@@ -1,19 +1,20 @@
 import BigNumber from "bignumber.js";
 import { dbHelper } from ".";
 import { NotificationInterface, NotificationModel } from "../models";
-import firebaseAdmin from 'firebase-admin';
+import { initializeApp, cert } from 'firebase-admin/app';
+import { getMessaging, Messaging } from 'firebase-admin/messaging';
 import { Op } from "sequelize";
 import { config } from "../config";
 import { pushNotification } from "../interfaces/global.interface";
 
 class UtilityHelper {
-  public messaging: firebaseAdmin.messaging.Messaging;
+  public messaging!: Messaging;
   constructor() {
     (async () => {
-      firebaseAdmin.initializeApp({
-        credential: firebaseAdmin.credential.cert(config.config.FIREBASE_SERVICE_ACCOUNT),
+      initializeApp({
+        credential: cert(config.config.FIREBASE_SERVICE_ACCOUNT),
       });
-      this.messaging = firebaseAdmin.messaging();
+      this.messaging = getMessaging();
     })();
   }
 
