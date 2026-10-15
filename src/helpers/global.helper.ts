@@ -7,13 +7,11 @@ class GlobalHelper {
 
     public async setHashTable(key: string, field: any, value: any, expiryInSeconds?: number) {
         try {
-            redisClient.HSET(key, field.toUpperCase(), value, (err: any, reply: any) => {
-                if (err) {
-                    console.error('redis set string data error...', err)
-                }
+            await redisClient.hSet(key, field.toUpperCase(), value).catch((err: any) => {
+                console.error('redis set string data error...', err)
             });
             if (expiryInSeconds) {
-                redisClient.EXPIRE(key, expiryInSeconds);
+                await redisClient.expire(key, expiryInSeconds);
             }
         } catch (err: any) {
             console.error('💥 ~ ~ set_hash_table error');
