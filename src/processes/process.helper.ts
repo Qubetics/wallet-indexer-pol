@@ -2,7 +2,6 @@ import database from "../config/db";
 import { QueryTypes } from "sequelize";
 import { CoinInterface, CoinsModel, PolOldBLockModel, WalletInterface } from "../models";
 import redisClient from "../config/redis";
-import { promisify } from "util";
 import { config } from "../config/config";
 import { TokenStandard } from "../enum";
 import { globalHelper } from "../helpers/global.helper";
@@ -21,8 +20,7 @@ class PolProcessHelper {
 
   public getKeyValuePair = async (keyName: string, field: string) => {
     try {
-      const getAsync = promisify(redisClient.HGET).bind(redisClient);
-      const value = await getAsync(keyName, field.toUpperCase() || "");
+      const value = await redisClient.hGet(keyName, field.toUpperCase() || "");
       return value;
     } catch (err: any) {
       console.error('getKeyValuePair >>>>', err);
@@ -33,12 +31,7 @@ class PolProcessHelper {
   public async getMultipleKeyValuePairs(keyName: string, fields: string[]) {
     try {
       const upperFields = fields.map(f => f.toUpperCase());
-      return new Promise((resolve, reject) => {
-        redisClient.hmget(keyName, ...upperFields, (err, results) => {
-          if (err) reject(err);
-          else resolve(results);
-        });
-      });
+      return await redisClient.hmGet(keyName, upperFields);
     } catch (err: any) {
       console.error('getMultipleKeyValuePairs >>>>', err);
       return null;
@@ -69,7 +62,7 @@ class PolProcessHelper {
 
   public setKeyValuePair = async (keyName: string, field: string, value: string) => {
     try {
-      redisClient.hset(keyName, field.toUpperCase(), value);
+      await redisClient.hSet(keyName, field.toUpperCase(), value);
     } catch (err: any) {
       console.error('setKeyValuePair >>>', err);
     }
@@ -91,12 +84,8 @@ class PolProcessHelper {
 
   public deleteKeyValuePair = async (keyName: string, field: string) => {
     try {
-      redisClient.hdel(keyName, field.toUpperCase(), function (err) {
-        if (err) {
-          throw err;
-        }
-        return true;
-      })
+      await redisClient.hDel(keyName, field.toUpperCase());
+      return true;
     } catch (err: any) {
       console.error("Error in deleteKeyValuePair>>>", err)
       return false;
