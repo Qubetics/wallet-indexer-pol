@@ -72,11 +72,11 @@ For development, `npm run dev` compiles and runs the service with `nodemon`.
 ## Run with Docker
 
 ```bash
-docker build -t wallet-indexer-polygon .
-docker run -d --name wallet-indexer-polygon \
+docker build -t wallet-indexer-pol .
+docker run -d --name wallet-indexer-pol \
   -e ZOOKEEPER_HOST=<zookeeper-host:port> \
   -e ZOOKEEPER_PATH=<config-node> \
-  wallet-indexer-polygon
+  wallet-indexer-pol
 ```
 
 The service does not listen on a port, so no port mapping is needed. ZooKeeper, MySQL, Redis, Kafka and the Polygon RPC node must be reachable from inside the container.
