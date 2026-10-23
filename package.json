@@ -14,7 +14,7 @@
     "processes"
   ],
   "author": "Qubetics",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@types/bignumber.js": "^5.0.0",
     "@types/node": "^16.3.2",
