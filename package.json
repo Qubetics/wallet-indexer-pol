@@ -1,0 +1,40 @@
+{
+  "name": "qubetics_wallet_processes",
+  "version": "1.0.0",
+  "description": "Process for qubetics wallet pol blockchain",
+  "main": "index.pol.ts",
+  "scripts": {
+    "compile": "tsc",
+    "server": "nodemon --max-old-space-size=2048 build/index.pol.js",
+    "dev": "concurrently \"npm run compile\" \"npm run server\"",
+    "start": "npm run compile && node build/index.pol.js",
+    "test": "tsc && node --test test/*.test.js"
+  },
+  "keywords": [
+    "processes"
+  ],
+  "author": "Qubetics",
+  "license": "ISC",
+  "dependencies": {
+    "@types/bignumber.js": "^5.0.0",
+    "@types/node": "^16.3.2",
+    "@types/node-schedule": "^1.3.2",
+    "@types/redis": "^2.8.31",
+    "@types/sequelize": "^4.28.10",
+    "bignumber.js": "^9.0.1",
+    "dotenv": "^14.3.2",
+    "ethers": "^6.13.4",
+    "firebase-admin": "^13.0.1",
+    "kafkajs": "^2.2.4",
+    "mysql2": "^2.3.0",
+    "node-schedule": "^2.0.0",
+    "node-zookeeper-client": "^1.1.3",
+    "nodemon": "^2.0.12",
+    "redis": "^3.1.2",
+    "sequelize": "^6.6.5",
+    "typescript": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/node-zookeeper-client": "^0.2.8"
+  }
+}

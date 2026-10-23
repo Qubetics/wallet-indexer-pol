@@ -1,0 +1,16 @@
+export enum CoinFamilyEnum {
+    NONE = 0,
+    BNB = 1,
+    ETH = 2,
+    BTC = 3,
+    POL = 4,
+    SOL = 5,
+    TRON = 6
+}
+
+export enum TokenStandard {
+    NONE = 'null',
+    ERC20 = 'ERC20',  // ethereum
+    ERC721 = 'ERC721',  // ethereum
+
+}
