@@ -16,7 +16,7 @@
   "author": "Qubetics",
   "license": "ISC",
   "engines": {
-    "node": ">=24.21.0 <25"
+    "node": ">=24.22.1 <25"
   },
   "dependencies": {
     "bignumber.js": "^11.1.5",
