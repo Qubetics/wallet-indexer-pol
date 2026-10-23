@@ -14,7 +14,7 @@
     "processes"
   ],
   "author": "Qubetics",
-  "license": "ISC",
+  "license": "MIT",
   "engines": {
     "node": ">=24.22.1 <25"
   },
